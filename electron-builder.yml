@@ -1,0 +1,34 @@
+appId: com.ytdownloader.app
+productName: YT Downloader
+directories:
+  output: release
+  buildResources: build
+files:
+  - dist/**/*
+  - build/**/*
+extraResources:
+  - from: build/yt-dlp/
+    to: yt-dlp/
+    filter:
+      - '**/*'
+win:
+  target: nsis
+  icon: build/icon.ico
+mac:
+  target: dmg
+  icon: build/icon.icns
+linux:
+  target:
+    - AppImage
+    - deb
+  icon: build/icon.png
+publish:
+  provider: github
+  owner: ''
+  repo: youtube-video-downloader
+nsis:
+  oneClick: false
+  perMachine: true
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
