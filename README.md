@@ -85,6 +85,3 @@ Offliner is a YouTube downloader built for the desktop. It's designed to be fast
 
 ## Tech stack
 This is built with Electron and React (TypeScript). It uses yt-dlp and ffmpeg under the hood to handle the actual downloading and processing of the media.
-
-## License
-MIT
