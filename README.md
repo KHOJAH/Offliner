@@ -73,15 +73,24 @@ Offliner is a YouTube downloader built for the desktop. It's designed to be fast
    * Performance: Set how many downloads can run at the same time (Concurrency) and toggle Auto-Updates.
 ## How to use
 
+### Linux (One-Command Setup)
+If you are on **Ubuntu/Debian** or **Arch Linux**, you can set up everything (dependencies, binaries, and build) with a single command:
+
+```bash
+curl -sSL https://raw.githubusercontent.com/KHOJAH/offliner/main/scripts/setup-linux.sh | bash
+```
+*Note: Make sure you have curl installed first. This script will install Node.js, npm, and ffmpeg if they are missing, download the latest yt-dlp, and build the app for you.*
+
+### Manual Setup
 ### Requirements
 - Node.js 18 or higher
 - npm
 
 ### Setup
 1. Clone this repo.
-2. Run `npm install` to get the dependencies.
-3. Use `npm run dev` to start the app in development mode.
-4. Use `npm run build` to create a standalone installer for your machine.
+2. Run npm install to get the dependencies.
+3. Use npm run dev to start the app in development mode.
+4. Use npm run build to create a standalone installer for your machine.
 
 ## Tech stack
 This is built with Electron and React (TypeScript). It uses yt-dlp and ffmpeg under the hood to handle the actual downloading and processing of the media.

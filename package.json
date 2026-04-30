@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "A beautiful desktop media downloader with glassmorphism UI",
   "main": "dist/main/index.js",
-  "author": "",
+  "author": "Ramez Khojah <Khojahramez29@gmail.com>",
   "license": "MIT",
   "scripts": {
     "dev": "vite",

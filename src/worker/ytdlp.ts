@@ -1,7 +1,7 @@
 // src/worker/ytdlp.ts
 import { spawn, ChildProcess } from 'child_process';
 import { existsSync } from 'fs';
-import { join, dirname } from 'path';
+import { join } from 'path';
 import { parseProgress, ProgressUpdate } from './progress-parser';
 import type { VideoMetadata, ClipRange } from '../types';
 
@@ -29,44 +29,59 @@ export class YtDlp {
   private findYtDlp(): string {
     const isDev = process.env.NODE_ENV === 'development';
     const resourcesPath = process.env.RESOURCES_PATH;
+    const platform = process.platform;
+    const binName = platform === 'win32' ? 'yt-dlp.exe' : 'yt-dlp';
+    const platFolder = platform === 'win32' ? 'win32' : platform === 'darwin' ? 'darwin' : 'linux';
     
     // 1. Check in RESOURCES_PATH (passed from main)
     if (resourcesPath) {
-      const prodPath = join(resourcesPath, 'yt-dlp', 'win32', 'yt-dlp.exe');
+      const prodPath = join(resourcesPath, 'yt-dlp', platFolder, binName);
       if (existsSync(prodPath)) return prodPath;
     }
 
     // 2. Fallback for Dev if RESOURCES_PATH failed
     if (isDev) {
-      const devPath = join(process.cwd(), 'build', 'yt-dlp', 'win32', 'yt-dlp.exe');
+      const devPath = join(process.cwd(), 'build', 'yt-dlp', platFolder, binName);
       if (existsSync(devPath)) return devPath;
     }
 
     // 3. Last resort: system PATH
-    return 'yt-dlp';
+    return binName;
   }
 
   private findFfmpeg(): string | null {
     const isDev = process.env.NODE_ENV === 'development';
     const resourcesPath = process.env.RESOURCES_PATH;
+    const platform = process.platform;
+    const binName = platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg';
 
     // 1. Check in RESOURCES_PATH
     if (resourcesPath) {
-      const prodPath = join(resourcesPath, 'ffmpeg', 'ffmpeg.exe');
+      // Try platform-specific subfolder first
+      const platFolder = platform === 'win32' ? 'win32' : platform === 'darwin' ? 'darwin' : 'linux';
+      let prodPath = join(resourcesPath, 'ffmpeg', platFolder, binName);
+      if (existsSync(prodPath)) return prodPath;
+      
+      // Fallback to legacy structure (ffmpeg/ffmpeg.exe)
+      prodPath = join(resourcesPath, 'ffmpeg', binName);
       if (existsSync(prodPath)) return prodPath;
     }
 
     // 2. Fallback for Dev
     if (isDev) {
-      const devPath = join(process.cwd(), 'build', 'ffmpeg', 'ffmpeg.exe');
+      const platFolder = platform === 'win32' ? 'win32' : platform === 'darwin' ? 'darwin' : 'linux';
+      let devPath = join(process.cwd(), 'build', 'ffmpeg', platFolder, binName);
+      if (existsSync(devPath)) return devPath;
+
+      devPath = join(process.cwd(), 'build', 'ffmpeg', binName);
       if (existsSync(devPath)) return devPath;
     }
 
     // 3. Try system PATH
     try {
       const { execSync } = require('child_process');
-      execSync('ffmpeg -version', { stdio: 'ignore' });
-      return 'ffmpeg';
+      execSync(`${binName} -version`, { stdio: 'ignore' });
+      return binName;
     } catch {
       return null;
     }
@@ -168,7 +183,10 @@ export class YtDlp {
     console.error(`[worker] Spawning yt-dlp: ${this.ytdlpPath} ${args.join(' ')}`);
 
     return new Promise((resolve, reject) => {
-      this.process = spawn(this.ytdlpPath, args, { stdio: ['ignore', 'pipe', 'pipe'] });
+      this.process = spawn(this.ytdlpPath, args, { 
+        stdio: ['ignore', 'pipe', 'pipe'],
+        detached: process.platform !== 'win32'
+      });
 
       let finalPath = '';
       let errorOutput = '';
@@ -225,14 +243,6 @@ export class YtDlp {
         reject(new Error(`Failed to start yt-dlp: ${err.message}`));
       });
     });
-  }
-
-  private formatSeconds(seconds: number): string {
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = Math.floor(seconds % 60);
-    const ms = Math.floor((seconds % 1) * 100);
-    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}`;
   }
 
   private buildArgs(options: YtDlpOptions): string[] {
@@ -307,8 +317,12 @@ export class YtDlp {
       if (process.platform === 'win32' && this.process.pid) {
         const { spawn } = require('child_process');
         spawn('taskkill', ['/pid', this.process.pid.toString(), '/f', '/t']);
-      } else {
-        this.process.kill('SIGKILL');
+      } else if (this.process.pid) {
+        try {
+          process.kill(-this.process.pid, 'SIGKILL');
+        } catch (e) {
+          this.process.kill('SIGKILL');
+        }
       }
       this.process = null;
     }
