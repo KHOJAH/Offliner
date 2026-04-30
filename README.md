@@ -79,6 +79,9 @@ If you are on **Ubuntu/Debian** or **Arch Linux**, you can set up everything (de
 ```bash
 curl -sSL https://raw.githubusercontent.com/KHOJAH/offliner/main/scripts/setup-linux.sh | bash
 ```
+
+
+
 *Note: Make sure you have curl installed first. This script will install Node.js, npm, and ffmpeg if they are missing, download the latest yt-dlp, and build the app for you.*
 
 ### Manual Setup
