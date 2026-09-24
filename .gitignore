@@ -230,6 +230,9 @@ Thumbs.db
 
 # Build artifacts
 *.tsbuildinfo
+*.old
+*.exe.old
 
 # .superpowers (brainstorming session files)
 .superpowers/
+

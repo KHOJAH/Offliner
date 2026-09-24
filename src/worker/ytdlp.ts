@@ -1,7 +1,7 @@
 // src/worker/ytdlp.ts
 import { spawn, ChildProcess } from 'child_process';
 import { existsSync } from 'fs';
-import { join } from 'path';
+import { join, dirname } from 'path';
 import { parseProgress, ProgressUpdate } from './progress-parser';
 import type { VideoMetadata, ClipRange } from '../types';
 
@@ -19,11 +19,13 @@ export interface YtDlpOptions {
 export class YtDlp {
   private ytdlpPath: string;
   private ffmpegPath: string | null = null;
+  private jsRuntimes: string[] = [];
   private process: ChildProcess | null = null;
 
   constructor() {
     this.ytdlpPath = this.findYtDlp();
     this.ffmpegPath = this.findFfmpeg();
+    this.jsRuntimes = this.findJsRuntimes();
   }
 
   private findYtDlp(): string {
@@ -87,12 +89,106 @@ export class YtDlp {
     }
   }
 
+  private findJsRuntimes(): string[] {
+    const runtimes: string[] = [];
+    const isWin = process.platform === 'win32';
+    const resourcesPath = process.env.RESOURCES_PATH;
+    const home = process.env.HOME || process.env.USERPROFILE || '';
+
+    // 1. Check for Deno
+    const denoName = isWin ? 'deno.exe' : 'deno';
+    const possibleDenoPaths: string[] = [];
+
+    if (this.ytdlpPath && this.ytdlpPath !== (isWin ? 'yt-dlp.exe' : 'yt-dlp')) {
+      possibleDenoPaths.push(join(dirname(this.ytdlpPath), denoName));
+    }
+    if (resourcesPath) {
+      possibleDenoPaths.push(join(resourcesPath, 'deno', denoName));
+      possibleDenoPaths.push(join(resourcesPath, 'yt-dlp', denoName));
+    }
+    if (home) {
+      possibleDenoPaths.push(join(home, '.deno', 'bin', denoName));
+    }
+
+    let foundDeno = false;
+    for (const p of possibleDenoPaths) {
+      if (existsSync(p)) {
+        runtimes.push(`deno:${p}`);
+        foundDeno = true;
+        break;
+      }
+    }
+
+    if (!foundDeno) {
+      try {
+        const { execSync } = require('child_process');
+        execSync(`${denoName} --version`, { stdio: 'ignore' });
+        runtimes.push('deno');
+        foundDeno = true;
+      } catch {
+        // Not in PATH
+      }
+    }
+
+    // 2. Check for Node.js
+    const nodeName = isWin ? 'node.exe' : 'node';
+    try {
+      const { execSync } = require('child_process');
+      execSync(`${nodeName} --version`, { stdio: 'ignore' });
+      runtimes.push('node');
+    } catch {
+      // Not in PATH
+    }
+
+    // 3. Check for Bun
+    const bunName = isWin ? 'bun.exe' : 'bun';
+    let foundBun = false;
+    if (home) {
+      const bunPath = join(home, '.bun', 'bin', bunName);
+      if (existsSync(bunPath)) {
+        runtimes.push(`bun:${bunPath}`);
+        foundBun = true;
+      }
+    }
+    if (!foundBun) {
+      try {
+        const { execSync } = require('child_process');
+        execSync(`${bunName} --version`, { stdio: 'ignore' });
+        runtimes.push('bun');
+      } catch {
+        // Not in PATH
+      }
+    }
+
+    // Default fallback: enable both deno and node so yt-dlp queries system PATH internally
+    if (runtimes.length === 0) {
+      runtimes.push('deno');
+      runtimes.push('node');
+    }
+
+    return runtimes;
+  }
+
+  private getCommonExtractionArgs(): string[] {
+    const args: string[] = [
+      '--no-update',
+    ];
+
+    for (const rt of this.jsRuntimes) {
+      args.push('--js-runtimes', rt);
+    }
+
+    args.push('--extractor-args', 'youtube:player_client=default,web,mweb,ios,android');
+
+    return args;
+  }
+
   async fetchMetadata(url: string, options: { noPlaylist?: boolean; flatPlaylist?: boolean } = {}): Promise<VideoMetadata> {
     const args = [
       '--dump-single-json',
       '--no-download',
       '--no-warnings',
-      url,
+      ...this.getCommonExtractionArgs(),
     ];
 
     if (options.noPlaylist) {
@@ -102,6 +198,8 @@ export class YtDlp {
     if (options.flatPlaylist || url.includes('list=') || url.includes('playlist?')) {
       args.push('--flat-playlist');
     }
+
+    args.push(url);
 
     return new Promise((resolve, reject) => {
       const child = spawn(this.ytdlpPath, args, { stdio: ['ignore', 'pipe', 'pipe'] });
@@ -289,6 +387,7 @@ export class YtDlp {
     // Common flags
     args.push('--newline', '--no-overwrites', '--restrict-filenames');
     args.push('--no-check-certificates', '--prefer-free-formats');
+    args.push(...this.getCommonExtractionArgs());
     
     // Fix echo issues by preventing multiple audio streams from being mixed incorrectly
     // or by forcing a single audio stream if possible.
@@ -310,6 +409,30 @@ export class YtDlp {
     args.push(options.url);
 
     return args;
+  }
+
+  async updateYtDlp(): Promise<{ success: boolean; message: string }> {
+    return new Promise((resolve) => {
+      const child = spawn(this.ytdlpPath, ['-U'], { stdio: ['ignore', 'pipe', 'pipe'] });
+      let output = '';
+
+      child.stdout?.on('data', (chunk: Buffer) => { output += chunk.toString(); });
+      child.stderr?.on('data', (chunk: Buffer) => { output += chunk.toString(); });
+
+      child.on('close', (code) => {
+        resolve({
+          success: code === 0,
+          message: output.trim() || `yt-dlp update exited with code ${code}`,
+        });
+      });
+
+      child.on('error', (err) => {
+        resolve({
+          success: false,
+          message: `Failed to execute yt-dlp update: ${err.message}`,
+        });
+      });
+    });
   }
 
   kill(): void {

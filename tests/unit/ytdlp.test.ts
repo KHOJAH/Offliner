@@ -70,4 +70,28 @@ describe('YtDlp', () => {
     expect(opts.clips![0].start).toBe(0);
     expect(opts.clips![0].end).toBe(30);
   });
+
+  it('includes --no-update to suppress the 90-day warning', () => {
+    const ytdlp = new YtDlp();
+    const opts: YtDlpOptions = { url: 'https://youtube.com/watch?v=abc' };
+    const args = (ytdlp as any).buildArgs(opts);
+    expect(args).toContain('--no-update');
+  });
+
+  it('includes --js-runtimes to solve YouTube player challenges', () => {
+    const ytdlp = new YtDlp();
+    const opts: YtDlpOptions = { url: 'https://youtube.com/watch?v=abc' };
+    const args = (ytdlp as any).buildArgs(opts);
+    expect(args).toContain('--js-runtimes');
+  });
+
+  it('includes youtube player_client fallback extractor args to prevent 403 Forbidden', () => {
+    const ytdlp = new YtDlp();
+    const opts: YtDlpOptions = { url: 'https://youtube.com/watch?v=abc' };
+    const args = (ytdlp as any).buildArgs(opts);
+    const extractorIndex = args.indexOf('--extractor-args');
+    expect(extractorIndex).not.toBe(-1);
+    expect(args[extractorIndex + 1]).toContain('youtube:player_client=');
+    expect(args[extractorIndex + 1]).toContain('android');
+  });
 });

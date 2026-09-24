@@ -7,7 +7,8 @@
   "license": "MIT",
   "scripts": {
     "dev": "vite",
-    "prebuild": "node scripts/convert-icon.js",
+    "prebuild": "node scripts/convert-icon.js && node scripts/update-binaries.js",
+    "update:binaries": "node scripts/update-binaries.js",
     "build": "npm run prebuild && vite build && electron-builder",
     "build:only": "tsc && vite build",
     "preview": "vite preview",
