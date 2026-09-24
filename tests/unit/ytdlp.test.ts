@@ -113,4 +113,36 @@ describe('YtDlp', () => {
     expect(args[extractorIndex + 1]).toContain('youtube:player_client=');
     expect(args[extractorIndex + 1]).toContain('android');
   });
+
+  it('defaults video export to MP4 using --merge-output-format and --remux-video', () => {
+    const ytdlp = new YtDlp();
+    const opts: YtDlpOptions = { url: 'https://youtube.com/watch?v=abc' };
+    const args = (ytdlp as any).buildArgs(opts);
+    expect(args).toContain('--merge-output-format');
+    const mergeIndex = args.indexOf('--merge-output-format');
+    expect(args[mergeIndex + 1]).toBe('mp4');
+    expect(args).toContain('--remux-video');
+    const remuxIndex = args.indexOf('--remux-video');
+    expect(args[remuxIndex + 1]).toBe('mp4');
+    expect(args).not.toContain('--prefer-free-formats');
+  });
+
+  it('respects custom videoFormat if provided', () => {
+    const ytdlp = new YtDlp();
+    const opts: YtDlpOptions = { url: 'https://youtube.com/watch?v=abc', videoFormat: 'mkv' };
+    const args = (ytdlp as any).buildArgs(opts);
+    const mergeIndex = args.indexOf('--merge-output-format');
+    expect(args[mergeIndex + 1]).toBe('mkv');
+    const remuxIndex = args.indexOf('--remux-video');
+    expect(args[remuxIndex + 1]).toBe('mkv');
+  });
+
+  it('does not add mp4 merge/remux args when extracting audio', () => {
+    const ytdlp = new YtDlp();
+    const opts: YtDlpOptions = { url: 'https://youtube.com/watch?v=abc', extractAudio: true, audioFormat: 'mp3' };
+    const args = (ytdlp as any).buildArgs(opts);
+    expect(args).not.toContain('--merge-output-format');
+    expect(args).not.toContain('--remux-video');
+  });
 });
+

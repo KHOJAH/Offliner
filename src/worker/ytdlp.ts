@@ -8,6 +8,7 @@ import type { VideoMetadata, ClipRange } from '../types';
 export interface YtDlpOptions {
   url: string;
   format?: string;
+  videoFormat?: string;
   outputPath?: string;
   audioFormat?: string;
   audioQuality?: number;
@@ -377,9 +378,16 @@ export class YtDlp {
       args.push('--output', join(options.outputPath, outputTemplate));
     }
 
+    // Container format - merge & remux to MP4 by default for video/clip downloads
+    if (!options.extractAudio) {
+      const container = options.videoFormat || 'mp4';
+      args.push('--merge-output-format', container);
+      args.push('--remux-video', container);
+    }
+
     // Common flags
     args.push('--newline', '--no-overwrites', '--restrict-filenames');
-    args.push('--no-check-certificates', '--prefer-free-formats');
+    args.push('--no-check-certificates');
     args.push(...this.getCommonExtractionArgs());
     
     // Fix echo issues by preventing multiple audio streams from being mixed incorrectly

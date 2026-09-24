@@ -78,6 +78,7 @@ async function handleCommand(cmd: CommandMessage): Promise<void> {
       const opts: YtDlpOptions = {
         url: config.url,
         format: config.format,
+        videoFormat: config.videoFormat,
         outputPath: config.outputPath,
         audioFormat: config.audioFormat,
         audioQuality: config.audioQuality,

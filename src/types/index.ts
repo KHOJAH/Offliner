@@ -65,6 +65,7 @@ export interface ClipRange {
 export interface DownloadConfig {
   url: string;
   format?: string;
+  videoFormat?: string;
   audioFormat?: string;
   audioQuality?: number;
   clips?: ClipRange[];
