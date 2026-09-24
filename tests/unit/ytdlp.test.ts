@@ -61,14 +61,33 @@ describe('YtDlp', () => {
     expect(opts.audioFormat).toBe('mp3');
   });
 
-  it('builds clip download args', () => {
+  it('builds clip download args with download-sections and force-keyframes-at-cuts', () => {
+    const ytdlp = new YtDlp();
     const opts: YtDlpOptions = {
       url: 'https://youtube.com/watch?v=abc',
-      clips: [{ name: 'intro', start: 0, end: 30 }],
+      clips: [{ name: 'intro', start: 10, end: 30 }],
     };
-    expect(opts.clips).toHaveLength(1);
-    expect(opts.clips![0].start).toBe(0);
-    expect(opts.clips![0].end).toBe(30);
+    const args = (ytdlp as any).buildArgs(opts);
+    expect(args).toContain('--download-sections');
+    const sectionIndex = args.indexOf('--download-sections');
+    expect(args[sectionIndex + 1]).toBe('*10-30');
+    expect(args).toContain('--force-keyframes-at-cuts');
+    expect(args).not.toContain('--external-downloader');
+  });
+
+  it('builds multiple clip download args with download-sections and force-keyframes-at-cuts', () => {
+    const ytdlp = new YtDlp();
+    const opts: YtDlpOptions = {
+      url: 'https://youtube.com/watch?v=abc',
+      clips: [
+        { name: 'part1', start: 10, end: 30 },
+        { name: 'part2', start: 60, end: 90 },
+      ],
+    };
+    const args = (ytdlp as any).buildArgs(opts);
+    expect(args).toContain('--download-sections');
+    expect(args).toContain('--force-keyframes-at-cuts');
+    expect(args).not.toContain('--external-downloader');
   });
 
   it('includes --no-update to suppress the 90-day warning', () => {

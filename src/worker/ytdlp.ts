@@ -178,7 +178,7 @@ export class YtDlp {
       args.push('--js-runtimes', rt);
     }
 
-    args.push('--extractor-args', 'youtube:player_client=default,web,mweb,ios,android');
+    args.push('--extractor-args', 'youtube:player_client=web,mweb,android,default');
 
     return args;
   }
@@ -359,20 +359,13 @@ export class YtDlp {
       args.push('-f', format);
     }
 
-    // Clip support - using --external-downloader ffmpeg and seeking for better compatibility
+    // Clip support - use download-sections with forced keyframes to prevent frozen video
     if (options.clips && options.clips.length > 0) {
-      if (options.clips.length === 1) {
-        const clip = options.clips[0];
-        // Use ffmpeg for seeking
-        args.push('--external-downloader', 'ffmpeg');
-        args.push('--external-downloader-args', `ffmpeg:-ss ${clip.start} -to ${clip.end}`);
-      } else {
-        // For multiple clips, we still use download-sections
-        for (const clip of options.clips) {
-          const sectionArg = `${clip.name || 'clip'}:*${clip.start}-${clip.end}`;
-          args.push('--download-sections', sectionArg);
-        }
+      for (const clip of options.clips) {
+        args.push('--download-sections', `*${clip.start}-${clip.end}`);
       }
+      // Force keyframes at cuts so video stream starts cleanly with no frozen frames
+      args.push('--force-keyframes-at-cuts');
     }
 
     // Output path
