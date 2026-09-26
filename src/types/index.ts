@@ -54,6 +54,7 @@ export interface FormatInfo {
   vbr?: number; // video bitrate
   fps?: number;
   note?: string;
+  protocol?: string;
 }
 
 export interface ClipRange {

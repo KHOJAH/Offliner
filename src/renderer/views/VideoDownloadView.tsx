@@ -31,8 +31,8 @@ export default function VideoDownloadView() {
     const videoFormats = formats.filter((f) => f.vcodec !== 'none');
     if (videoFormats.length === 0) return '';
     return [...videoFormats].sort((a, b) => {
-      const resA = parseInt(a.resolution.split('x')[1] || '0') || 0;
-      const resB = parseInt(b.resolution.split('x')[1] || '0') || 0;
+      const resA = parseInt(a.resolution?.split('x')[1] || a.resolution || '0') || 0;
+      const resB = parseInt(b.resolution?.split('x')[1] || b.resolution || '0') || 0;
       if (resB !== resA) return resB - resA;
       return (b.fps || 0) - (a.fps || 0);
     })[0]?.format_id;
@@ -81,6 +81,17 @@ export default function VideoDownloadView() {
 
   const handleDownload = async () => {
     if (!metadata || !selectedFormat) return;
+
+    if (isClipping) {
+      if (clipEnd <= clipStart) {
+        addToast({ type: 'error', title: 'Invalid clip duration', message: 'Clip end time must be greater than start time.' });
+        return;
+      }
+      if (clipEnd - clipStart < 1) {
+        addToast({ type: 'error', title: 'Clip too short', message: 'Minimum clip duration is 1 second.' });
+        return;
+      }
+    }
 
     const clips: ClipRange[] | undefined = isClipping ? [{ name: 'clip', start: clipStart, end: clipEnd }] : undefined;
 
@@ -158,7 +169,7 @@ export default function VideoDownloadView() {
                 style={{ padding: '14px 48px', fontSize: 16, borderRadius: 'var(--radius-xl)' }}
                 disabled={!selectedFormat}
               >
-                Download Video
+                {isClipping ? 'Download Clip' : 'Download Video'}
               </button>
             </div>
           </div>

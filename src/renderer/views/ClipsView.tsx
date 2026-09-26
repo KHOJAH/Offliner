@@ -66,6 +66,10 @@ export default function ClipsView() {
 
   const addClip = () => {
     if (!metadata) return;
+    if (end <= start) {
+      addToast({ type: 'error', title: 'Invalid clip duration', message: 'Clip end time must be greater than start time.' });
+      return;
+    }
     if (end - start < 1) {
       addToast({ type: 'error', title: 'Clip too short', message: 'Minimum clip duration is 1 second.' });
       return;

@@ -173,13 +173,14 @@ export class YtDlp {
   private getCommonExtractionArgs(): string[] {
     const args: string[] = [
       '--no-update',
+      '--format-sort', 'proto',
     ];
 
     for (const rt of this.jsRuntimes) {
       args.push('--js-runtimes', rt);
     }
 
-    args.push('--extractor-args', 'youtube:player_client=web,mweb,android,default');
+    args.push('--extractor-args', 'youtube:player_client=web_embedded,web');
 
     return args;
   }
@@ -237,7 +238,45 @@ export class YtDlp {
 
   private parseMetadata(json: Record<string, unknown>): VideoMetadata {
     const isPlaylist = json['_type'] === 'playlist' || Array.isArray(json['entries']);
-    const formats = ((json['formats'] as any[]) || []).map((f: Record<string, unknown>) => ({
+    const rawFormats = ((json['formats'] as any[]) || []);
+
+    // Filter out non-media storyboard formats (mhtml / storyboard)
+    let formatsList = rawFormats.filter((f) => {
+      if (f['protocol'] === 'mhtml' || f['ext'] === 'mhtml') return false;
+      const note = String(f['format_note'] || '').toLowerCase();
+      if (note.includes('storyboard')) return false;
+      return true;
+    });
+
+    const isM3u8Format = (f: Record<string, unknown>) => {
+      const proto = String(f['protocol'] || '').toLowerCase();
+      const url = String(f['url'] || '').toLowerCase();
+      const manifest = String(f['manifest_url'] || '').toLowerCase();
+      return proto.includes('m3u8') || url.includes('.m3u8') || manifest.includes('.m3u8');
+    };
+
+    // If direct HTTPS/HTTP video or audio formats exist, filter out m3u8 (HLS) formats
+    // to avoid selecting unseekable or throttled streams that freeze or stall clipping
+    const hasDirectVideo = formatsList.some(
+      (f) => f['vcodec'] && f['vcodec'] !== 'none' && !isM3u8Format(f)
+    );
+    const hasDirectAudio = formatsList.some(
+      (f) => f['acodec'] && f['acodec'] !== 'none' && !isM3u8Format(f)
+    );
+
+    if (hasDirectVideo || hasDirectAudio) {
+      formatsList = formatsList.filter((f) => {
+        if (!isM3u8Format(f)) return true;
+        const isVideo = f['vcodec'] && f['vcodec'] !== 'none';
+        const isAudio = f['acodec'] && f['acodec'] !== 'none' && !isVideo;
+        if (isVideo && hasDirectVideo) return false;
+        if (isAudio && hasDirectAudio) return false;
+        if (hasDirectVideo && hasDirectAudio) return false;
+        return true;
+      });
+    }
+
+    const formats = formatsList.map((f: Record<string, unknown>) => ({
       format_id: String(f['format_id'] || ''),
       ext: String(f['ext'] || 'unknown'),
       resolution: String(f['resolution'] || (f['vcodec'] !== 'none' ? 'unknown' : 'audio only')),
@@ -248,6 +287,7 @@ export class YtDlp {
       vbr: f['vbr'] as number | undefined,
       fps: f['fps'] as number | undefined,
       note: f['format_note'] as string | undefined,
+      protocol: f['protocol'] as string | undefined,
     }));
 
     const entries = isPlaylist ? (json['entries'] as any[]).map(e => ({
@@ -355,15 +395,26 @@ export class YtDlp {
     } else if (options.format) {
       let format = options.format;
       if (!options.extractAudio && !format.includes('+') && !format.includes('[') && format !== 'best') {
-        format = `${format}+bestaudio/best`;
+        format = `${format}+bestaudio[protocol!*=m3u8]/bestaudio/best`;
+      } else if (!options.extractAudio && format.includes('+') && !format.includes('[protocol!*=m3u8]')) {
+        format = format.replace(/\+bestaudio(\/best)?\b/, '+bestaudio[protocol!*=m3u8]/bestaudio/best');
+      }
+      if (options.clips && options.clips.length > 0 && !format.includes('[protocol!*=m3u8]')) {
+        if (!format.includes('[')) {
+          format = `${format}[protocol!*=m3u8]`;
+        }
       }
       args.push('-f', format);
+    } else if (options.clips && options.clips.length > 0) {
+      args.push('-f', 'bestvideo[protocol!*=m3u8]+bestaudio[protocol!*=m3u8]/best[protocol!*=m3u8]/best');
     }
 
     // Clip support - use download-sections with forced keyframes to prevent frozen video
     if (options.clips && options.clips.length > 0) {
       for (const clip of options.clips) {
-        args.push('--download-sections', `*${clip.start}-${clip.end}`);
+        const start = Math.max(0, clip.start);
+        const end = Math.max(start + 1, clip.end);
+        args.push('--download-sections', `*${start}-${end}`);
       }
       // Force keyframes at cuts so video stream starts cleanly with no frozen frames
       args.push('--force-keyframes-at-cuts');
