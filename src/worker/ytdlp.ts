@@ -30,8 +30,7 @@ export class YtDlp {
   }
 
   private findYtDlp(): string {
-    const isDev = process.env.NODE_ENV === 'development';
-    const resourcesPath = process.env.RESOURCES_PATH;
+    const resourcesPath = process.env.RESOURCES_PATH || (process as any).resourcesPath;
     const platform = process.platform;
     const binName = platform === 'win32' ? 'yt-dlp.exe' : 'yt-dlp';
     const platFolder = platform === 'win32' ? 'win32' : platform === 'darwin' ? 'darwin' : 'linux';
@@ -40,45 +39,42 @@ export class YtDlp {
     if (resourcesPath) {
       const prodPath = join(resourcesPath, 'yt-dlp', platFolder, binName);
       if (existsSync(prodPath)) return prodPath;
+      const legacyPath = join(resourcesPath, 'yt-dlp', binName);
+      if (existsSync(legacyPath)) return legacyPath;
     }
 
-    // 2. Fallback for Dev if RESOURCES_PATH failed
-    if (isDev) {
-      const devPath = join(process.cwd(), 'build', 'yt-dlp', platFolder, binName);
-      if (existsSync(devPath)) return devPath;
-    }
+    // 2. Check build folder
+    const devPlatPath = join(process.cwd(), 'build', 'yt-dlp', platFolder, binName);
+    if (existsSync(devPlatPath)) return devPlatPath;
+
+    const devPath = join(process.cwd(), 'build', 'yt-dlp', binName);
+    if (existsSync(devPath)) return devPath;
 
     // 3. Last resort: system PATH
     return binName;
   }
 
   private findFfmpeg(): string | null {
-    const isDev = process.env.NODE_ENV === 'development';
-    const resourcesPath = process.env.RESOURCES_PATH;
+    const resourcesPath = process.env.RESOURCES_PATH || (process as any).resourcesPath;
     const platform = process.platform;
     const binName = platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg';
+    const platFolder = platform === 'win32' ? 'win32' : platform === 'darwin' ? 'darwin' : 'linux';
 
     // 1. Check in RESOURCES_PATH
     if (resourcesPath) {
-      // Try platform-specific subfolder first
-      const platFolder = platform === 'win32' ? 'win32' : platform === 'darwin' ? 'darwin' : 'linux';
-      let prodPath = join(resourcesPath, 'ffmpeg', platFolder, binName);
+      const prodPath = join(resourcesPath, 'ffmpeg', platFolder, binName);
       if (existsSync(prodPath)) return prodPath;
       
-      // Fallback to legacy structure (ffmpeg/ffmpeg.exe)
-      prodPath = join(resourcesPath, 'ffmpeg', binName);
-      if (existsSync(prodPath)) return prodPath;
+      const legacyPath = join(resourcesPath, 'ffmpeg', binName);
+      if (existsSync(legacyPath)) return legacyPath;
     }
 
-    // 2. Fallback for Dev
-    if (isDev) {
-      const platFolder = platform === 'win32' ? 'win32' : platform === 'darwin' ? 'darwin' : 'linux';
-      let devPath = join(process.cwd(), 'build', 'ffmpeg', platFolder, binName);
-      if (existsSync(devPath)) return devPath;
+    // 2. Check build folder
+    const devPlatPath = join(process.cwd(), 'build', 'ffmpeg', platFolder, binName);
+    if (existsSync(devPlatPath)) return devPlatPath;
 
-      devPath = join(process.cwd(), 'build', 'ffmpeg', binName);
-      if (existsSync(devPath)) return devPath;
-    }
+    const devPath = join(process.cwd(), 'build', 'ffmpeg', binName);
+    if (existsSync(devPath)) return devPath;
 
     // 3. Try system PATH
     try {
@@ -329,35 +325,58 @@ export class YtDlp {
 
       let finalPath = '';
       let errorOutput = '';
+      let clipDuration: number | undefined;
+      if (options.clips && options.clips.length > 0) {
+        clipDuration = options.clips.reduce((acc, c) => acc + Math.max(1, (c.end || 0) - (c.start || 0)), 0);
+      }
+
+      let lineBuffer = '';
+      let lastPercent = 0;
+
+      const parseDestinationLine = (line: string) => {
+        const trimmed = line.trim();
+        if (trimmed.includes('[download] Destination:')) {
+          const p = trimmed.split('[download] Destination:')[1].trim();
+          if (p) finalPath = p;
+        } else if (trimmed.includes('has already been downloaded')) {
+          const parts = trimmed.split('has already been downloaded');
+          if (parts[0].includes('[download]')) {
+             const p = parts[0].split('[download]')[1].trim();
+             if (p) finalPath = p;
+          }
+        } else if (trimmed.includes('[Merger] Merging formats into "')) {
+          const p = trimmed.split('[Merger] Merging formats into "')[1].split('"')[0].trim();
+          if (p) finalPath = p;
+        } else if (trimmed.includes('[ExtractAudio] Destination:')) {
+           const p = trimmed.split('[ExtractAudio] Destination:')[1].trim();
+           if (p) finalPath = p;
+        } else if (trimmed.includes('[VideoRemuxer] Remuxing video from "')) {
+           const p = trimmed.split('to "')[1]?.split('"')[0]?.trim();
+           if (p) finalPath = p;
+        } else if (trimmed.includes('[MoveFiles] Moving file "')) {
+           const p = trimmed.split('to "')[1]?.split('"')[0]?.trim();
+           if (p) finalPath = p;
+        }
+      };
 
       const handleOutput = (data: Buffer) => {
         const text = data.toString();
         
-        const progress = parseProgress(text);
+        const progress = parseProgress(text, clipDuration);
         if (progress) {
+          if (progress.percent < lastPercent) {
+            progress.percent = lastPercent;
+          } else {
+            lastPercent = progress.percent;
+          }
           onProgress(progress);
         }
 
-        const lines = text.split('\n');
+        lineBuffer += text;
+        const lines = lineBuffer.split('\n');
+        lineBuffer = lines.pop() || '';
         for (const line of lines) {
-          const trimmed = line.trim();
-          if (trimmed.includes('[download] Destination:')) {
-            const p = trimmed.split('[download] Destination:')[1].trim();
-            if (p) finalPath = p;
-          } else if (trimmed.includes('has already been downloaded')) {
-            const parts = trimmed.split('has already been downloaded');
-            if (parts[0].includes('[download]')) {
-               const p = parts[0].split('[download]')[1].trim();
-               if (p) finalPath = p;
-            }
-          } else if (trimmed.includes('[Merger] Merging formats into "')) {
-            // Also capture merged file path
-            const p = trimmed.split('[Merger] Merging formats into "')[1].split('"')[0].trim();
-            if (p) finalPath = p;
-          } else if (trimmed.includes('[ExtractAudio] Destination:')) {
-             const p = trimmed.split('[ExtractAudio] Destination:')[1].trim();
-             if (p) finalPath = p;
-          }
+          parseDestinationLine(line);
         }
       };
 
@@ -370,6 +389,9 @@ export class YtDlp {
 
       this.process.on('close', (code) => {
         this.process = null;
+        if (lineBuffer.trim().length > 0) {
+          parseDestinationLine(lineBuffer);
+        }
         if (code === 0 || code === null) {
           resolve(finalPath);
         } else {
@@ -392,6 +414,25 @@ export class YtDlp {
       args.push('-x');
       if (options.audioFormat) args.push('--audio-format', options.audioFormat);
       if (options.audioQuality !== undefined) args.push('--audio-quality', String(options.audioQuality));
+      if (options.clips && options.clips.length > 0) {
+        // For audio clips, force seekable progressive format so FFmpeg does not soft-seek remote DASH audio
+        args.push('-f', 'b[protocol!*=m3u8]/b/best[protocol!*=m3u8]/best');
+      }
+    } else if (options.clips && options.clips.length > 0) {
+      // For clipping downloads, use progressive seekable formats (b[protocol!*=m3u8]/b/best[protocol!*=m3u8]/best)
+      // which download sections instantaneously via HTTP range requests without remote soft-seeking stalls.
+      let clipFormat = 'b[protocol!*=m3u8]/b/best[protocol!*=m3u8]/best';
+      if (options.format) {
+        if (options.format === '18' || options.format === '22') {
+          clipFormat = `${options.format}[protocol!*=m3u8]/${clipFormat}`;
+        } else if (options.format.startsWith('b[') || options.format.startsWith('best[')) {
+          const guarded = options.format.includes('protocol!*=m3u8')
+            ? options.format
+            : options.format.replace(/\]$/, '][protocol!*=m3u8]');
+          clipFormat = `${guarded}/${clipFormat}`;
+        }
+      }
+      args.push('-f', clipFormat);
     } else if (options.format) {
       let format = options.format;
       if (!options.extractAudio && !format.includes('+') && !format.includes('[') && format !== 'best') {
@@ -399,14 +440,7 @@ export class YtDlp {
       } else if (!options.extractAudio && format.includes('+') && !format.includes('[protocol!*=m3u8]')) {
         format = format.replace(/\+bestaudio(\/best)?\b/, '+bestaudio[protocol!*=m3u8]/bestaudio/best');
       }
-      if (options.clips && options.clips.length > 0 && !format.includes('[protocol!*=m3u8]')) {
-        if (!format.includes('[')) {
-          format = `${format}[protocol!*=m3u8]`;
-        }
-      }
       args.push('-f', format);
-    } else if (options.clips && options.clips.length > 0) {
-      args.push('-f', 'bestvideo[protocol!*=m3u8]+bestaudio[protocol!*=m3u8]/best[protocol!*=m3u8]/best');
     }
 
     // Clip support - use download-sections with forced keyframes to prevent frozen video
@@ -424,7 +458,7 @@ export class YtDlp {
     if (options.outputPath) {
       let outputTemplate = '%(title)s.%(ext)s';
       if (options.clips && options.clips.length > 0) {
-        outputTemplate = '%(title)s - %(section_title,clip)s.%(ext)s';
+        outputTemplate = '%(title)s - %(section_start)s-%(section_end)s.%(ext)s';
       }
       args.push('--output', join(options.outputPath, outputTemplate));
     }

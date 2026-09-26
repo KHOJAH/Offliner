@@ -187,6 +187,7 @@ describe('YtDlp', () => {
     const formatIndex = args.indexOf('-f');
     expect(formatIndex).not.toBe(-1);
     expect(args[formatIndex + 1]).toContain('protocol!*=m3u8');
+    expect(args[formatIndex + 1]).toBe('b[protocol!*=m3u8]/b/best[protocol!*=m3u8]/best');
   });
 
   it('clamps clip end time to be at least start + 1 when start >= end', () => {
@@ -280,6 +281,49 @@ describe('YtDlp', () => {
     const formatIndex = args.indexOf('-f');
     expect(formatIndex).not.toBe(-1);
     expect(args[formatIndex + 1]).toContain('protocol!*=m3u8');
+    expect(args[formatIndex + 1]).toBe('b[protocol!*=m3u8]/b/best[protocol!*=m3u8]/best');
+  });
+
+  it('buildArgs uses progressive seekable format when extractAudio and clips are both set', () => {
+    const ytdlp = new YtDlp();
+    const opts: YtDlpOptions = {
+      url: 'https://youtube.com/watch?v=abc',
+      extractAudio: true,
+      audioFormat: 'mp3',
+      clips: [{ name: 'clip1', start: 10, end: 20 }],
+    };
+    const args = (ytdlp as any).buildArgs(opts);
+    const formatIndex = args.indexOf('-f');
+    expect(formatIndex).not.toBe(-1);
+    expect(args[formatIndex + 1]).toBe('b[protocol!*=m3u8]/b/best[protocol!*=m3u8]/best');
+    expect(args).toContain('-x');
+    expect(args).toContain('--audio-format');
+  });
+
+  it('buildArgs sets clip output template with section_start and section_end to avoid duplicate filenames', () => {
+    const ytdlp = new YtDlp();
+    const opts: YtDlpOptions = {
+      url: 'https://youtube.com/watch?v=abc',
+      outputPath: '/downloads',
+      clips: [{ name: 'clip1', start: 10, end: 20 }],
+    };
+    const args = (ytdlp as any).buildArgs(opts);
+    const outputIndex = args.indexOf('--output');
+    expect(outputIndex).not.toBe(-1);
+    expect(args[outputIndex + 1]).toContain('%(section_start)s-%(section_end)s');
+  });
+
+  it('buildArgs preserves progressive formats with fallback when clipping', () => {
+    const ytdlp = new YtDlp();
+    const opts: YtDlpOptions = {
+      url: 'https://youtube.com/watch?v=abc',
+      format: '18',
+      clips: [{ name: 'clip1', start: 10, end: 20 }],
+    };
+    const args = (ytdlp as any).buildArgs(opts);
+    const formatIndex = args.indexOf('-f');
+    expect(formatIndex).not.toBe(-1);
+    expect(args[formatIndex + 1]).toBe('18[protocol!*=m3u8]/b[protocol!*=m3u8]/b/best[protocol!*=m3u8]/best');
   });
 });
 
