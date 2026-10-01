@@ -445,6 +445,9 @@ export class YtDlp {
       }
       // Force keyframes at cuts so video stream starts cleanly with no frozen frames
       args.push('--force-keyframes-at-cuts');
+      // Pass -short_seek_size 1 to FFmpeg input so it reconnects with HTTP Range requests
+      // instead of soft-seeking/draining remote DASH streams over HTTP
+      args.push('--downloader-args', 'ffmpeg_i:-short_seek_size 1');
     }
 
     // Output path
@@ -464,7 +467,7 @@ export class YtDlp {
     }
 
     // Common flags
-    args.push('--newline', '--no-overwrites', '--restrict-filenames');
+    args.push('--newline', '--force-overwrites', '--restrict-filenames');
     args.push('--no-check-certificates');
     args.push(...this.getCommonExtractionArgs());
     

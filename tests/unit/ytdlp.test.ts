@@ -325,6 +325,26 @@ describe('YtDlp', () => {
     expect(formatIndex).not.toBe(-1);
     expect(args[formatIndex + 1]).toBe('18+bestaudio[protocol!*=m3u8]/bestaudio/best');
   });
+
+  it('buildArgs passes --downloader-args ffmpeg_i:-short_seek_size 1 when clipping to prevent HTTP soft-seeking stalls', () => {
+    const ytdlp = new YtDlp();
+    const opts: YtDlpOptions = {
+      url: 'https://youtube.com/watch?v=abc',
+      clips: [{ name: 'clip1', start: 10, end: 20 }],
+    };
+    const args = (ytdlp as any).buildArgs(opts);
+    expect(args).toContain('--downloader-args');
+    const dlArgIndex = args.indexOf('--downloader-args');
+    expect(args[dlArgIndex + 1]).toBe('ffmpeg_i:-short_seek_size 1');
+  });
+
+  it('buildArgs includes --force-overwrites to overwrite existing/stale clips or videos', () => {
+    const ytdlp = new YtDlp();
+    const opts: YtDlpOptions = { url: 'https://youtube.com/watch?v=abc' };
+    const args = (ytdlp as any).buildArgs(opts);
+    expect(args).toContain('--force-overwrites');
+    expect(args).not.toContain('--no-overwrites');
+  });
 });
 
 
