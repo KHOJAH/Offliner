@@ -1,5 +1,5 @@
-appId: com.ytdownloader.app
-productName: YT Downloader
+appId: com.offliner.app
+productName: Offliner
 directories:
   output: release
   buildResources: build
@@ -7,13 +7,17 @@ files:
   - dist/**/*
   - build/**/*
 extraResources:
-  - from: build/yt-dlp/
-    to: yt-dlp/
+  - from: build/ffmpeg
+    to: ffmpeg
+    filter:
+      - '**/*'
+  - from: build/yt-dlp
+    to: yt-dlp
     filter:
       - '**/*'
 win:
   target: nsis
-  icon: build/icon.ico
+  icon: build/icon.png
 mac:
   target: dmg
   icon: build/icon.icns
@@ -24,11 +28,10 @@ linux:
   icon: build/icon.png
 publish:
   provider: github
-  owner: ''
-  repo: youtube-video-downloader
+  owner: KHOJAH
+  repo: offliner
 nsis:
   oneClick: false
-  perMachine: true
   allowToChangeInstallationDirectory: true
-  createDesktopShortcut: true
+  createDesktopShortcut: always
   createStartMenuShortcut: true
