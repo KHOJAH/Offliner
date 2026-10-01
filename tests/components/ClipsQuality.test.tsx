@@ -174,5 +174,47 @@ describe('Clip Quality Preservation in Views', () => {
       const calledConfig = (window as any).electronAPI.addDownload.mock.calls[0][0];
       expect(calledConfig.format).toBe('137');
     });
+
+    it('prioritizes highest fps and bitrate format when multiple formats share the same resolution', async () => {
+      const multiQualityMeta: VideoMetadata = {
+        ...mockMetadata,
+        formats: [
+          { format_id: '137', ext: 'mp4', resolution: '1920x1080', vcodec: 'avc1', acodec: 'none', fps: 30, vbr: 1500 },
+          { format_id: '299', ext: 'mp4', resolution: '1920x1080', vcodec: 'avc1', acodec: 'none', fps: 60, vbr: 3000 },
+        ],
+      };
+      (window as any).electronAPI.getMetadata.mockResolvedValue(multiQualityMeta);
+
+      render(
+        <MemoryRouter initialEntries={['/clips']}>
+          <ClipsView />
+        </MemoryRouter>
+      );
+
+      const input = screen.getByPlaceholderText(/paste youtube url/i);
+      fireEvent.change(input, { target: { value: 'https://youtube.com/watch?v=test123' } });
+      fireEvent.submit(screen.getByRole('form'));
+
+      await waitFor(() => {
+        expect(screen.getByText('Test Quality Video')).toBeInTheDocument();
+      });
+
+      // The 1080p button should show 60fps
+      expect(screen.getByText('60fps')).toBeInTheDocument();
+
+      const addClipBtn = screen.getByText('Add Clip');
+      fireEvent.click(addClipBtn);
+
+      const downloadAllBtn = screen.getByText('Download All Clips');
+      fireEvent.click(downloadAllBtn);
+
+      await waitFor(() => {
+        expect((window as any).electronAPI.addDownload).toHaveBeenCalledTimes(1);
+      });
+
+      const calledConfig = (window as any).electronAPI.addDownload.mock.calls[0][0];
+      // Should pick format '299' (60fps), not format '137' (30fps)
+      expect(calledConfig.format).toBe('299');
+    });
   });
 });

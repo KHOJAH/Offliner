@@ -20,6 +20,8 @@ export default function FormatSelector({ formats, selected, onSelect, mode = 'bo
     return resB - resA;
   });
 
+  const selectedFormatObj = videoFormats.find((f) => f.format_id === selected);
+
   return (
     <div>
       {videoFormats.length > 0 && (
@@ -27,9 +29,14 @@ export default function FormatSelector({ formats, selected, onSelect, mode = 'bo
           <h4 style={{ marginBottom: 8, fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>Video Quality</h4>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {resolutions.map((res) => {
-              const format = videoFormats.find((f) => f.resolution === res);
+              const format = videoFormats
+                .filter((f) => f.resolution === res)
+                .sort((a, b) => {
+                  if ((b.fps || 0) !== (a.fps || 0)) return (b.fps || 0) - (a.fps || 0);
+                  return (b.vbr || b.abr || 0) - (a.vbr || a.abr || 0);
+                })[0];
               if (!format) return null;
-              const isSelected = selected === format.format_id;
+              const isSelected = selected === format.format_id || (selectedFormatObj && selectedFormatObj.resolution === res);
               return (
                 <button
                   key={format.format_id}

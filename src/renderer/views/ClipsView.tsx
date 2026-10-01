@@ -39,7 +39,8 @@ export default function ClipsView() {
       const resA = parseInt(a.resolution?.split('x')[1] || a.resolution || '0') || 0;
       const resB = parseInt(b.resolution?.split('x')[1] || b.resolution || '0') || 0;
       if (resB !== resA) return resB - resA;
-      return (b.fps || 0) - (a.fps || 0);
+      if ((b.fps || 0) !== (a.fps || 0)) return (b.fps || 0) - (a.fps || 0);
+      return (b.vbr || b.tbr || b.abr || 0) - (a.vbr || a.tbr || a.abr || 0);
     })[0]?.format_id;
   };
 
@@ -114,9 +115,11 @@ export default function ClipsView() {
       end: c.end,
     }));
 
+    const formatToUse = selectedFormat || findBestVideoFormat(metadata.formats) || undefined;
+
     const id = await ipcClient.addDownload({
       url: metadata.url,
-      format: selectedFormat || undefined,
+      format: formatToUse,
       outputPath: downloadPath,
       clips: clipRanges,
     });
@@ -128,7 +131,7 @@ export default function ClipsView() {
       thumbnail: metadata.thumbnail,
       status: 'downloading',
       progress: 0,
-      config: { url: metadata.url, format: selectedFormat || undefined, clips: clipRanges, outputPath: downloadPath },
+      config: { url: metadata.url, format: formatToUse, clips: clipRanges, outputPath: downloadPath },
       createdAt: Date.now(),
     });
 

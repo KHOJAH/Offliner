@@ -34,7 +34,8 @@ export default function VideoDownloadView() {
       const resA = parseInt(a.resolution?.split('x')[1] || a.resolution || '0') || 0;
       const resB = parseInt(b.resolution?.split('x')[1] || b.resolution || '0') || 0;
       if (resB !== resA) return resB - resA;
-      return (b.fps || 0) - (a.fps || 0);
+      if ((b.fps || 0) !== (a.fps || 0)) return (b.fps || 0) - (a.fps || 0);
+      return (b.vbr || b.tbr || b.abr || 0) - (a.vbr || a.tbr || a.abr || 0);
     })[0]?.format_id;
   };
 
@@ -80,7 +81,7 @@ export default function VideoDownloadView() {
   }, [location.pathname, location.state?.url, location.state?.autoAnalyze, handleURL, navigate]);
 
   const handleDownload = async () => {
-    if (!metadata || !selectedFormat) return;
+    if (!metadata) return;
 
     if (isClipping) {
       if (clipEnd <= clipStart) {
@@ -93,11 +94,12 @@ export default function VideoDownloadView() {
       }
     }
 
+    const formatToUse = selectedFormat || findBestVideoFormat(metadata.formats) || undefined;
     const clips: ClipRange[] | undefined = isClipping ? [{ name: 'clip', start: clipStart, end: clipEnd }] : undefined;
 
     const id = await ipcClient.addDownload({
       url: metadata.url,
-      format: selectedFormat,
+      format: formatToUse,
       outputPath: downloadPath,
       clips,
     });
@@ -109,7 +111,7 @@ export default function VideoDownloadView() {
       thumbnail: metadata.thumbnail,
       status: 'downloading',
       progress: 0,
-      config: { url: metadata.url, format: selectedFormat, clips, outputPath: downloadPath },
+      config: { url: metadata.url, format: formatToUse, clips, outputPath: downloadPath },
       createdAt: Date.now(),
     });
 
@@ -167,7 +169,7 @@ export default function VideoDownloadView() {
                 className="btn btn-primary"
                 onClick={handleDownload}
                 style={{ padding: '14px 48px', fontSize: 16, borderRadius: 'var(--radius-xl)' }}
-                disabled={!selectedFormat}
+                disabled={!metadata}
               >
                 {isClipping ? 'Download Clip' : 'Download Video'}
               </button>

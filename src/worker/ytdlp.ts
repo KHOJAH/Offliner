@@ -410,6 +410,8 @@ export class YtDlp {
     const args: string[] = [];
 
     // Format selection
+    const maxQualityFormat = 'bestvideo[protocol!*=m3u8]+bestaudio[protocol!*=m3u8]/best[protocol!*=m3u8]/best';
+
     if (options.extractAudio) {
       args.push('-x');
       if (options.audioFormat) args.push('--audio-format', options.audioFormat);
@@ -418,13 +420,13 @@ export class YtDlp {
         args.push('-f', 'bestaudio[protocol!*=m3u8]/best');
       }
     } else if (options.format) {
-      let format = options.format;
-      if (format === 'best') {
-        format = 'bestvideo[protocol!*=m3u8]+bestaudio[protocol!*=m3u8]/best[protocol!*=m3u8]/best';
+      let format = options.format.trim();
+      if (format === 'best' || format === 'b') {
+        format = maxQualityFormat;
       } else if (!format.includes('+') && !format.includes('[')) {
-        format = `${format}+bestaudio[protocol!*=m3u8]/bestaudio/best`;
+        format = `${format}+bestaudio[protocol!*=m3u8]/${maxQualityFormat}`;
       } else if (format.includes('+') && !format.includes('[protocol!*=m3u8]')) {
-        format = format.replace(/\+bestaudio(\/best)?\b/, '+bestaudio[protocol!*=m3u8]/bestaudio/best');
+        format = format.replace(/\+bestaudio(\/best)?\b/, `+bestaudio[protocol!*=m3u8]/${maxQualityFormat}`);
       } else if (format.startsWith('b[') || format.startsWith('best[')) {
         if (!format.includes('protocol!*=m3u8')) {
           format = format.replace(/\]$/, '][protocol!*=m3u8]');
@@ -433,7 +435,7 @@ export class YtDlp {
       args.push('-f', format);
     } else if (options.clips && options.clips.length > 0) {
       // If no quality specified for clips, default to maximum quality
-      args.push('-f', 'bestvideo[protocol!*=m3u8]+bestaudio[protocol!*=m3u8]/best[protocol!*=m3u8]/best');
+      args.push('-f', maxQualityFormat);
     }
 
     // Clip support - use download-sections with forced keyframes to prevent frozen video
@@ -443,8 +445,10 @@ export class YtDlp {
         const end = Math.max(start + 1, clip.end);
         args.push('--download-sections', `*${start}-${end}`);
       }
-      // Force keyframes at cuts so video stream starts cleanly with no frozen frames
-      args.push('--force-keyframes-at-cuts');
+      if (!options.extractAudio) {
+        // Force keyframes at cuts so video stream starts cleanly with no frozen frames
+        args.push('--force-keyframes-at-cuts');
+      }
       // Pass -short_seek_size 1 to FFmpeg input so it reconnects with HTTP Range requests
       // instead of soft-seeking/draining remote DASH streams over HTTP
       args.push('--downloader-args', 'ffmpeg_i:-short_seek_size 1');

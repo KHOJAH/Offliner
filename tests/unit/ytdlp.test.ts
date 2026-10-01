@@ -281,10 +281,10 @@ describe('YtDlp', () => {
     const formatIndex = args.indexOf('-f');
     expect(formatIndex).not.toBe(-1);
     expect(args[formatIndex + 1]).toContain('protocol!*=m3u8');
-    expect(args[formatIndex + 1]).toBe('137+bestaudio[protocol!*=m3u8]/bestaudio/best');
+    expect(args[formatIndex + 1]).toBe('137+bestaudio[protocol!*=m3u8]/bestvideo[protocol!*=m3u8]+bestaudio[protocol!*=m3u8]/best[protocol!*=m3u8]/best');
   });
 
-  it('buildArgs uses best audio format when extractAudio and clips are both set', () => {
+  it('buildArgs uses best audio format when extractAudio and clips are both set and skips video keyframes', () => {
     const ytdlp = new YtDlp();
     const opts: YtDlpOptions = {
       url: 'https://youtube.com/watch?v=abc',
@@ -298,6 +298,7 @@ describe('YtDlp', () => {
     expect(args[formatIndex + 1]).toBe('bestaudio[protocol!*=m3u8]/best');
     expect(args).toContain('-x');
     expect(args).toContain('--audio-format');
+    expect(args).not.toContain('--force-keyframes-at-cuts');
   });
 
   it('buildArgs sets clip output template with section_start and section_end to avoid duplicate filenames', () => {
@@ -323,7 +324,20 @@ describe('YtDlp', () => {
     const args = (ytdlp as any).buildArgs(opts);
     const formatIndex = args.indexOf('-f');
     expect(formatIndex).not.toBe(-1);
-    expect(args[formatIndex + 1]).toBe('18+bestaudio[protocol!*=m3u8]/bestaudio/best');
+    expect(args[formatIndex + 1]).toBe('18+bestaudio[protocol!*=m3u8]/bestvideo[protocol!*=m3u8]+bestaudio[protocol!*=m3u8]/best[protocol!*=m3u8]/best');
+  });
+
+  it('buildArgs maps format "best" or "b" to maxQualityFormat with m3u8 exclusions', () => {
+    const ytdlp = new YtDlp();
+    const optsBest: YtDlpOptions = { url: 'https://youtube.com/watch?v=abc', format: 'best' };
+    const argsBest = (ytdlp as any).buildArgs(optsBest);
+    const idxBest = argsBest.indexOf('-f');
+    expect(argsBest[idxBest + 1]).toBe('bestvideo[protocol!*=m3u8]+bestaudio[protocol!*=m3u8]/best[protocol!*=m3u8]/best');
+
+    const optsB: YtDlpOptions = { url: 'https://youtube.com/watch?v=abc', format: 'b' };
+    const argsB = (ytdlp as any).buildArgs(optsB);
+    const idxB = argsB.indexOf('-f');
+    expect(argsB[idxB + 1]).toBe('bestvideo[protocol!*=m3u8]+bestaudio[protocol!*=m3u8]/best[protocol!*=m3u8]/best');
   });
 
   it('buildArgs passes --downloader-args ffmpeg_i:-short_seek_size 1 when clipping to prevent HTTP soft-seeking stalls', () => {
