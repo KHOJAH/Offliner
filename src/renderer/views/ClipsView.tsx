@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import URLInput from '@/components/URLInput';
 import VideoPreview from '@/components/VideoPreview';
+import FormatSelector from '@/components/FormatSelector';
 import ClipTimeline from '@/components/ClipTimeline';
 import TimeInput from '@/components/TimeInput';
 import { ipcClient } from '@/ipc/client';
@@ -23,12 +24,24 @@ export default function ClipsView() {
   const navigate = useNavigate();
   const [metadata, setMetadata] = useState<VideoMetadata | null>(null);
   const [loading, setLoading] = useState(false);
+  const [selectedFormat, setSelectedFormat] = useState<string>('');
   const [clips, setClips] = useState<ClipDef[]>([]);
   const [start, setStart] = useState(0);
   const [end, setEnd] = useState(60);
   const addToast = useUIStore((s) => s.addToast);
   const addDownload = useDownloadStore((s) => s.addDownload);
   const downloadPath = useSettingsStore((s) => s.downloadPath);
+
+  const findBestVideoFormat = (formats: any[]) => {
+    const videoFormats = formats.filter((f) => f.vcodec !== 'none');
+    if (videoFormats.length === 0) return '';
+    return [...videoFormats].sort((a, b) => {
+      const resA = parseInt(a.resolution?.split('x')[1] || a.resolution || '0') || 0;
+      const resB = parseInt(b.resolution?.split('x')[1] || b.resolution || '0') || 0;
+      if (resB !== resA) return resB - resA;
+      return (b.fps || 0) - (a.fps || 0);
+    })[0]?.format_id;
+  };
 
   const handleURL = useCallback(async (url: string) => {
     if (!url.trim()) return;
@@ -44,6 +57,8 @@ export default function ClipsView() {
       const meta = await ipcClient.getMetadata(url);
       setMetadata(meta);
       setEnd(meta.duration);
+      const best = findBestVideoFormat(meta.formats);
+      if (best) setSelectedFormat(best);
     } catch {
       addToast({ type: 'error', title: 'Error', message: 'Could not fetch video info.' });
     } finally {
@@ -61,6 +76,8 @@ export default function ClipsView() {
   useEffect(() => {
     if (metadata) {
       setEnd(metadata.duration);
+      const best = findBestVideoFormat(metadata.formats);
+      if (best) setSelectedFormat(best);
     }
   }, [metadata]);
 
@@ -99,6 +116,7 @@ export default function ClipsView() {
 
     const id = await ipcClient.addDownload({
       url: metadata.url,
+      format: selectedFormat || undefined,
       outputPath: downloadPath,
       clips: clipRanges,
     });
@@ -110,7 +128,7 @@ export default function ClipsView() {
       thumbnail: metadata.thumbnail,
       status: 'downloading',
       progress: 0,
-      config: { url: metadata.url, clips: clipRanges, outputPath: downloadPath },
+      config: { url: metadata.url, format: selectedFormat || undefined, clips: clipRanges, outputPath: downloadPath },
       createdAt: Date.now(),
     });
 
@@ -132,6 +150,16 @@ export default function ClipsView() {
           <div className="page-enter" style={{ marginTop: 32, display: 'flex', flexDirection: 'column', gap: 24 }}>
             <div className="glass" style={{ padding: 24, borderRadius: 'var(--radius-lg)' }}>
               <VideoPreview metadata={metadata} />
+            </div>
+
+            <div className="glass" style={{ padding: 24, borderRadius: 'var(--radius-lg)' }}>
+              <h4 style={{ marginBottom: 16, fontSize: 16 }}>Format & Quality</h4>
+              <FormatSelector
+                formats={metadata.formats}
+                selected={selectedFormat}
+                onSelect={setSelectedFormat}
+                mode="video"
+              />
             </div>
 
             <div className="glass" style={{ padding: 24, borderRadius: 'var(--radius-lg)' }}>

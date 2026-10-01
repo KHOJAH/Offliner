@@ -97,7 +97,7 @@ export default function VideoDownloadView() {
 
     const id = await ipcClient.addDownload({
       url: metadata.url,
-      format: isClipping ? undefined : selectedFormat,
+      format: selectedFormat,
       outputPath: downloadPath,
       clips,
     });
@@ -109,7 +109,7 @@ export default function VideoDownloadView() {
       thumbnail: metadata.thumbnail,
       status: 'downloading',
       progress: 0,
-      config: { url: metadata.url, format: isClipping ? undefined : selectedFormat, clips, outputPath: downloadPath },
+      config: { url: metadata.url, format: selectedFormat, clips, outputPath: downloadPath },
       createdAt: Date.now(),
     });
 

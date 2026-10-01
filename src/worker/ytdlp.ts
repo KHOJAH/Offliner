@@ -415,32 +415,25 @@ export class YtDlp {
       if (options.audioFormat) args.push('--audio-format', options.audioFormat);
       if (options.audioQuality !== undefined) args.push('--audio-quality', String(options.audioQuality));
       if (options.clips && options.clips.length > 0) {
-        // For audio clips, force seekable progressive format so FFmpeg does not soft-seek remote DASH audio
-        args.push('-f', 'b[protocol!*=m3u8]/b/best[protocol!*=m3u8]/best');
+        args.push('-f', 'bestaudio[protocol!*=m3u8]/best');
       }
-    } else if (options.clips && options.clips.length > 0) {
-      // For clipping downloads, use progressive seekable formats (b[protocol!*=m3u8]/b/best[protocol!*=m3u8]/best)
-      // which download sections instantaneously via HTTP range requests without remote soft-seeking stalls.
-      let clipFormat = 'b[protocol!*=m3u8]/b/best[protocol!*=m3u8]/best';
-      if (options.format) {
-        if (options.format === '18' || options.format === '22') {
-          clipFormat = `${options.format}[protocol!*=m3u8]/${clipFormat}`;
-        } else if (options.format.startsWith('b[') || options.format.startsWith('best[')) {
-          const guarded = options.format.includes('protocol!*=m3u8')
-            ? options.format
-            : options.format.replace(/\]$/, '][protocol!*=m3u8]');
-          clipFormat = `${guarded}/${clipFormat}`;
-        }
-      }
-      args.push('-f', clipFormat);
     } else if (options.format) {
       let format = options.format;
-      if (!options.extractAudio && !format.includes('+') && !format.includes('[') && format !== 'best') {
+      if (format === 'best') {
+        format = 'bestvideo[protocol!*=m3u8]+bestaudio[protocol!*=m3u8]/best[protocol!*=m3u8]/best';
+      } else if (!format.includes('+') && !format.includes('[')) {
         format = `${format}+bestaudio[protocol!*=m3u8]/bestaudio/best`;
-      } else if (!options.extractAudio && format.includes('+') && !format.includes('[protocol!*=m3u8]')) {
+      } else if (format.includes('+') && !format.includes('[protocol!*=m3u8]')) {
         format = format.replace(/\+bestaudio(\/best)?\b/, '+bestaudio[protocol!*=m3u8]/bestaudio/best');
+      } else if (format.startsWith('b[') || format.startsWith('best[')) {
+        if (!format.includes('protocol!*=m3u8')) {
+          format = format.replace(/\]$/, '][protocol!*=m3u8]');
+        }
       }
       args.push('-f', format);
+    } else if (options.clips && options.clips.length > 0) {
+      // If no quality specified for clips, default to maximum quality
+      args.push('-f', 'bestvideo[protocol!*=m3u8]+bestaudio[protocol!*=m3u8]/best[protocol!*=m3u8]/best');
     }
 
     // Clip support - use download-sections with forced keyframes to prevent frozen video

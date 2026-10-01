@@ -8,7 +8,8 @@ Object.defineProperty(window, 'electronAPI', {
     pauseDownload: vi.fn(), resumeDownload: vi.fn(), getSettings: vi.fn(),
     updateSettings: vi.fn(), selectDownloadPath: vi.fn(), checkForUpdates: vi.fn(),
     onDownloadProgress: vi.fn(), onDownloadDone: vi.fn(), onDownloadError: vi.fn(),
-    onDownloadMetadata: vi.fn(), onUpdateReady: vi.fn(), platform: 'win32',
+    onDownloadMetadata: vi.fn(), onUpdateReady: vi.fn(), loadDownloads: vi.fn().mockResolvedValue([]),
+    saveDownloads: vi.fn().mockResolvedValue(undefined), platform: 'win32',
   },
   writable: true, configurable: true,
 });

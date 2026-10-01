@@ -177,7 +177,7 @@ describe('YtDlp', () => {
     expect(args[formatIndex + 1]).toContain('bestaudio[protocol!*=m3u8]');
   });
 
-  it('uses protocol!*=m3u8 for default clip downloads when no format is specified', () => {
+  it('uses protocol!*=m3u8 for default clip downloads when no format is specified and defaults to maximum quality', () => {
     const ytdlp = new YtDlp();
     const opts: YtDlpOptions = {
       url: 'https://youtube.com/watch?v=abc',
@@ -187,7 +187,7 @@ describe('YtDlp', () => {
     const formatIndex = args.indexOf('-f');
     expect(formatIndex).not.toBe(-1);
     expect(args[formatIndex + 1]).toContain('protocol!*=m3u8');
-    expect(args[formatIndex + 1]).toBe('b[protocol!*=m3u8]/b/best[protocol!*=m3u8]/best');
+    expect(args[formatIndex + 1]).toBe('bestvideo[protocol!*=m3u8]+bestaudio[protocol!*=m3u8]/best[protocol!*=m3u8]/best');
   });
 
   it('clamps clip end time to be at least start + 1 when start >= end', () => {
@@ -270,7 +270,7 @@ describe('YtDlp', () => {
     expect(args[formatIndex + 1]).toContain('bestaudio[protocol!*=m3u8]');
   });
 
-  it('buildArgs guards custom format with protocol!*=m3u8 when clipping', () => {
+  it('buildArgs preserves user selected custom format with audio merging when clipping', () => {
     const ytdlp = new YtDlp();
     const opts: YtDlpOptions = {
       url: 'https://youtube.com/watch?v=abc',
@@ -281,10 +281,10 @@ describe('YtDlp', () => {
     const formatIndex = args.indexOf('-f');
     expect(formatIndex).not.toBe(-1);
     expect(args[formatIndex + 1]).toContain('protocol!*=m3u8');
-    expect(args[formatIndex + 1]).toBe('b[protocol!*=m3u8]/b/best[protocol!*=m3u8]/best');
+    expect(args[formatIndex + 1]).toBe('137+bestaudio[protocol!*=m3u8]/bestaudio/best');
   });
 
-  it('buildArgs uses progressive seekable format when extractAudio and clips are both set', () => {
+  it('buildArgs uses best audio format when extractAudio and clips are both set', () => {
     const ytdlp = new YtDlp();
     const opts: YtDlpOptions = {
       url: 'https://youtube.com/watch?v=abc',
@@ -295,7 +295,7 @@ describe('YtDlp', () => {
     const args = (ytdlp as any).buildArgs(opts);
     const formatIndex = args.indexOf('-f');
     expect(formatIndex).not.toBe(-1);
-    expect(args[formatIndex + 1]).toBe('b[protocol!*=m3u8]/b/best[protocol!*=m3u8]/best');
+    expect(args[formatIndex + 1]).toBe('bestaudio[protocol!*=m3u8]/best');
     expect(args).toContain('-x');
     expect(args).toContain('--audio-format');
   });
@@ -313,7 +313,7 @@ describe('YtDlp', () => {
     expect(args[outputIndex + 1]).toContain('%(section_start)s-%(section_end)s');
   });
 
-  it('buildArgs preserves progressive formats with fallback when clipping', () => {
+  it('buildArgs preserves user selected progressive format with audio merging when clipping', () => {
     const ytdlp = new YtDlp();
     const opts: YtDlpOptions = {
       url: 'https://youtube.com/watch?v=abc',
@@ -323,7 +323,7 @@ describe('YtDlp', () => {
     const args = (ytdlp as any).buildArgs(opts);
     const formatIndex = args.indexOf('-f');
     expect(formatIndex).not.toBe(-1);
-    expect(args[formatIndex + 1]).toBe('18[protocol!*=m3u8]/b[protocol!*=m3u8]/b/best[protocol!*=m3u8]/best');
+    expect(args[formatIndex + 1]).toBe('18+bestaudio[protocol!*=m3u8]/bestaudio/best');
   });
 });
 
