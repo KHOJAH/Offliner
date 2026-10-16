@@ -14,9 +14,20 @@ export default function FormatSelector({ formats, selected, onSelect, mode = 'bo
   const videoFormats = formats.filter((f) => f.vcodec !== 'none' && (mode === 'video' || mode === 'both'));
   const audioFormats = formats.filter((f) => f.acodec !== 'none' && f.vcodec === 'none' && (mode === 'audio' || mode === 'both'));
 
+  const getResNumber = (resStr?: string): number => {
+    if (!resStr) return 0;
+    if (resStr.includes('x')) {
+      const parts = resStr.split('x');
+      const w = parseInt(parts[0], 10) || 0;
+      const h = parseInt(parts[1], 10) || 0;
+      return Math.max(w, h);
+    }
+    return parseInt(resStr, 10) || 0;
+  };
+
   const resolutions = [...new Set(videoFormats.map((f) => f.resolution || 'unknown'))].sort((a, b) => {
-    const resA = parseInt(a.split('x')[1] || a) || 0;
-    const resB = parseInt(b.split('x')[1] || b) || 0;
+    const resA = getResNumber(a);
+    const resB = getResNumber(b);
     return resB - resA;
   });
 

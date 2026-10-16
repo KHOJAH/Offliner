@@ -18,6 +18,7 @@ declare global {
       saveDownloads: (downloads: DownloadItem[]) => Promise<void>;
       selectDownloadPath: () => Promise<string | null>;
       checkForUpdates: () => Promise<UpdateInfo | null>;
+      getVersion: () => Promise<string>;
       openFile: (filePath: string) => Promise<void>;
       showInFolder: (filePath: string) => Promise<void>;
       fileExists: (filePath: string) => Promise<boolean>;
@@ -44,6 +45,7 @@ export const ipcClient = {
   saveDownloads: (downloads: DownloadItem[]) => window.electronAPI.saveDownloads(downloads),
   selectDownloadPath: () => window.electronAPI.selectDownloadPath(),
   checkForUpdates: () => window.electronAPI.checkForUpdates(),
+  getVersion: () => window.electronAPI?.getVersion ? window.electronAPI.getVersion() : Promise.resolve('1.1.1'),
   openFile: (filePath: string) => window.electronAPI.openFile(filePath),
   showInFolder: (filePath: string) => window.electronAPI.showInFolder(filePath),
   fileExists: (filePath: string) => window.electronAPI.fileExists(filePath),

@@ -33,11 +33,21 @@ export default function ClipsView() {
   const downloadPath = useSettingsStore((s) => s.downloadPath);
 
   const findBestVideoFormat = (formats: any[]) => {
-    const videoFormats = formats.filter((f) => f.vcodec !== 'none');
+    const videoFormats = formats.filter((f) => f.vcodec && f.vcodec !== 'none');
     if (videoFormats.length === 0) return '';
     return [...videoFormats].sort((a, b) => {
-      const resA = parseInt(a.resolution?.split('x')[1] || a.resolution || '0') || 0;
-      const resB = parseInt(b.resolution?.split('x')[1] || b.resolution || '0') || 0;
+      const getResNumber = (resStr?: string): number => {
+        if (!resStr) return 0;
+        if (resStr.includes('x')) {
+          const parts = resStr.split('x');
+          const w = parseInt(parts[0], 10) || 0;
+          const h = parseInt(parts[1], 10) || 0;
+          return Math.max(w, h);
+        }
+        return parseInt(resStr, 10) || 0;
+      };
+      const resA = getResNumber(a.resolution);
+      const resB = getResNumber(b.resolution);
       if (resB !== resA) return resB - resA;
       if ((b.fps || 0) !== (a.fps || 0)) return (b.fps || 0) - (a.fps || 0);
       return (b.vbr || b.tbr || b.abr || 0) - (a.vbr || a.tbr || a.abr || 0);

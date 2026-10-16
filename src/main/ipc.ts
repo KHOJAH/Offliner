@@ -225,6 +225,11 @@ export function registerIPCHandlers(): void {
   ipcMain.handle('app:check-for-updates', async (): Promise<UpdateInfo | null> => {
     return checkForUpdates();
   });
+
+  // Get app version
+  ipcMain.handle('app:get-version', (): string => {
+    return app.getVersion();
+  });
 }
 
 export function stopWorker(): void {

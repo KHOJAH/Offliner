@@ -1,5 +1,4 @@
-// src/renderer/views/SettingsView.tsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useUIStore } from '@/stores/uiStore';
 import { ipcClient } from '@/ipc/client';
@@ -9,6 +8,11 @@ export default function SettingsView() {
   const addToast = useUIStore((s) => s.addToast);
   const [updateInfo, setUpdateInfo] = useState<{ version: string; releaseNotes?: string } | null>(null);
   const [checkingUpdate, setCheckingUpdate] = useState(false);
+  const [appVersion, setAppVersion] = useState('1.1.1');
+
+  useEffect(() => {
+    ipcClient.getVersion().then(setAppVersion).catch(() => {});
+  }, []);
 
   const handleSelectPath = async () => {
     const path = await ipcClient.selectDownloadPath();
@@ -99,7 +103,7 @@ export default function SettingsView() {
             <div>
               <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-primary)' }}>Software Update</div>
               <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>
-                Current Version: 0.1.0
+                Current Version: {appVersion}
               </div>
             </div>
             <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>

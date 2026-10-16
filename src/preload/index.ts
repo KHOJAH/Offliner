@@ -18,6 +18,7 @@ const api = {
   saveDownloads: (downloads: DownloadItem[]) => ipcRenderer.invoke('app:save-downloads', downloads) as Promise<void>,
   selectDownloadPath: () => ipcRenderer.invoke('app:select-download-path') as Promise<string | null>,
   checkForUpdates: () => ipcRenderer.invoke('app:check-for-updates') as Promise<UpdateInfo | null>,
+  getVersion: () => ipcRenderer.invoke('app:get-version') as Promise<string>,
   openFile: (filePath: string) => ipcRenderer.invoke('shell:open', filePath) as Promise<void>,
   showInFolder: (filePath: string) => ipcRenderer.invoke('shell:show', filePath) as Promise<void>,
   fileExists: (filePath: string) => ipcRenderer.invoke('shell:exists', filePath) as Promise<boolean>,

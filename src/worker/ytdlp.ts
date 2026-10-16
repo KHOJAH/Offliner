@@ -272,19 +272,29 @@ export class YtDlp {
       });
     }
 
-    const formats = formatsList.map((f: Record<string, unknown>) => ({
-      format_id: String(f['format_id'] || ''),
-      ext: String(f['ext'] || 'unknown'),
-      resolution: String(f['resolution'] || (f['vcodec'] !== 'none' ? 'unknown' : 'audio only')),
-      filesize: f['filesize'] as number | undefined,
-      vcodec: f['vcodec'] as string | undefined,
-      acodec: f['acodec'] as string | undefined,
-      abr: f['abr'] as number | undefined,
-      vbr: f['vbr'] as number | undefined,
-      fps: f['fps'] as number | undefined,
-      note: f['format_note'] as string | undefined,
-      protocol: f['protocol'] as string | undefined,
-    }));
+    const formats = formatsList.map((f: Record<string, unknown>) => {
+      let res = f['resolution'] as string | undefined;
+      if (!res && f['vcodec'] && f['vcodec'] !== 'none') {
+        if (f['width'] && f['height']) {
+          res = `${f['width']}x${f['height']}`;
+        } else if (f['height']) {
+          res = `${f['height']}p`;
+        }
+      }
+      return {
+        format_id: String(f['format_id'] || ''),
+        ext: String(f['ext'] || 'unknown'),
+        resolution: String(res || (f['vcodec'] !== 'none' ? 'unknown' : 'audio only')),
+        filesize: f['filesize'] as number | undefined,
+        vcodec: f['vcodec'] as string | undefined,
+        acodec: f['acodec'] as string | undefined,
+        abr: f['abr'] as number | undefined,
+        vbr: f['vbr'] as number | undefined,
+        fps: f['fps'] as number | undefined,
+        note: f['format_note'] as string | undefined,
+        protocol: f['protocol'] as string | undefined,
+      };
+    });
 
     const entries = isPlaylist ? (json['entries'] as any[]).map(e => ({
       id: String(e['id']),
@@ -419,7 +429,7 @@ export class YtDlp {
       if (options.clips && options.clips.length > 0) {
         args.push('-f', 'bestaudio[protocol!*=m3u8]/best');
       }
-    } else if (options.format) {
+    } else if (options.format && options.format !== 'undefined' && options.format !== 'null') {
       let format = options.format.trim();
       if (format === 'best' || format === 'b') {
         format = maxQualityFormat;
