@@ -4,6 +4,12 @@ import { existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { parseProgress, ProgressUpdate } from './progress-parser';
 import type { VideoMetadata, ClipRange } from '../types';
+import {
+  buildDownloadArgs,
+  buildMetadataArgs,
+  parseMetadata,
+  getBestThumbnail,
+} from '../engine/ytdlp';
 
 export interface YtDlpOptions {
   url: string;
@@ -224,103 +230,11 @@ export class YtDlp {
   }
 
   private getBestThumbnail(json: any): string {
-    if (json.thumbnail) return json.thumbnail;
-    if (json.thumbnails && Array.isArray(json.thumbnails) && json.thumbnails.length > 0) {
-      // Pick the last one which is usually highest res
-      return json.thumbnails[json.thumbnails.length - 1].url || '';
-    }
-    return '';
+    return getBestThumbnail(json);
   }
 
   private parseMetadata(json: Record<string, unknown>): VideoMetadata {
-    const isPlaylist = json['_type'] === 'playlist' || Array.isArray(json['entries']);
-    const rawFormats = ((json['formats'] as any[]) || []);
-
-    // Filter out non-media storyboard formats (mhtml / storyboard)
-    let formatsList = rawFormats.filter((f) => {
-      if (f['protocol'] === 'mhtml' || f['ext'] === 'mhtml') return false;
-      const note = String(f['format_note'] || '').toLowerCase();
-      if (note.includes('storyboard')) return false;
-      return true;
-    });
-
-    const isM3u8Format = (f: Record<string, unknown>) => {
-      const proto = String(f['protocol'] || '').toLowerCase();
-      const url = String(f['url'] || '').toLowerCase();
-      const manifest = String(f['manifest_url'] || '').toLowerCase();
-      return proto.includes('m3u8') || url.includes('.m3u8') || manifest.includes('.m3u8');
-    };
-
-    // If direct HTTPS/HTTP video or audio formats exist, filter out m3u8 (HLS) formats
-    // to avoid selecting unseekable or throttled streams that freeze or stall clipping
-    const hasDirectVideo = formatsList.some(
-      (f) => f['vcodec'] && f['vcodec'] !== 'none' && !isM3u8Format(f)
-    );
-    const hasDirectAudio = formatsList.some(
-      (f) => f['acodec'] && f['acodec'] !== 'none' && !isM3u8Format(f)
-    );
-
-    if (hasDirectVideo || hasDirectAudio) {
-      formatsList = formatsList.filter((f) => {
-        if (!isM3u8Format(f)) return true;
-        const isVideo = f['vcodec'] && f['vcodec'] !== 'none';
-        const isAudio = f['acodec'] && f['acodec'] !== 'none' && !isVideo;
-        if (isVideo && hasDirectVideo) return false;
-        if (isAudio && hasDirectAudio) return false;
-        if (hasDirectVideo && hasDirectAudio) return false;
-        return true;
-      });
-    }
-
-    const formats = formatsList.map((f: Record<string, unknown>) => {
-      let res = f['resolution'] as string | undefined;
-      if (!res && f['vcodec'] && f['vcodec'] !== 'none') {
-        if (f['width'] && f['height']) {
-          res = `${f['width']}x${f['height']}`;
-        } else if (f['height']) {
-          res = `${f['height']}p`;
-        }
-      }
-      return {
-        format_id: String(f['format_id'] || ''),
-        ext: String(f['ext'] || 'unknown'),
-        resolution: String(res || (f['vcodec'] !== 'none' ? 'unknown' : 'audio only')),
-        filesize: f['filesize'] as number | undefined,
-        vcodec: f['vcodec'] as string | undefined,
-        acodec: f['acodec'] as string | undefined,
-        abr: f['abr'] as number | undefined,
-        vbr: f['vbr'] as number | undefined,
-        fps: f['fps'] as number | undefined,
-        note: f['format_note'] as string | undefined,
-        protocol: f['protocol'] as string | undefined,
-      };
-    });
-
-    const entries = isPlaylist ? (json['entries'] as any[]).map(e => ({
-      id: String(e['id']),
-      url: String(e['webpage_url'] || e['url'] || ''),
-      title: String(e['title'] || 'Unknown'),
-      thumbnail: this.getBestThumbnail(e),
-      duration: Number(e['duration'] || 0),
-      uploader: String(e['uploader'] || 'Unknown'),
-      formats: [],
-      is_playlist: false,
-    })) as VideoMetadata[] : undefined;
-
-    return {
-      id: String(json['id'] || ''),
-      url: String(json['webpage_url'] || ''),
-      title: String(json['title'] || 'Unknown'),
-      description: json['description'] as string | undefined,
-      duration: Number(json['duration'] || 0),
-      thumbnail: this.getBestThumbnail(json),
-      uploader: String(json['uploader'] || 'Unknown'),
-      upload_date: json['upload_date'] as string | undefined,
-      view_count: json['view_count'] as number | undefined,
-      formats,
-      is_playlist: isPlaylist,
-      entries,
-    };
+    return parseMetadata(json);
   }
 
   startDownload(options: YtDlpOptions, onProgress: (update: ProgressUpdate) => void): Promise<string> {
@@ -417,94 +331,10 @@ export class YtDlp {
   }
 
   private buildArgs(options: YtDlpOptions): string[] {
-    const args: string[] = [];
-
-    // Format selection
-    const maxQualityFormat = 'bestvideo[protocol!*=m3u8]+bestaudio[protocol!*=m3u8]/best[protocol!*=m3u8]/best';
-
-    if (options.extractAudio) {
-      args.push('-x');
-      if (options.audioFormat) args.push('--audio-format', options.audioFormat);
-      if (options.audioQuality !== undefined) args.push('--audio-quality', String(options.audioQuality));
-      if (options.clips && options.clips.length > 0) {
-        args.push('-f', 'bestaudio[protocol!*=m3u8]/best');
-      }
-    } else if (options.format && options.format !== 'undefined' && options.format !== 'null') {
-      let format = options.format.trim();
-      if (format === 'best' || format === 'b') {
-        format = maxQualityFormat;
-      } else if (!format.includes('+') && !format.includes('[')) {
-        format = `${format}+bestaudio[protocol!*=m3u8]/${maxQualityFormat}`;
-      } else if (format.includes('+') && !format.includes('[protocol!*=m3u8]')) {
-        format = format.replace(/\+bestaudio(\/best)?\b/, `+bestaudio[protocol!*=m3u8]/${maxQualityFormat}`);
-      } else if (format.startsWith('b[') || format.startsWith('best[')) {
-        if (!format.includes('protocol!*=m3u8')) {
-          format = format.replace(/\]$/, '][protocol!*=m3u8]');
-        }
-      }
-      args.push('-f', format);
-    } else if (options.clips && options.clips.length > 0) {
-      // If no quality specified for clips, default to maximum quality
-      args.push('-f', maxQualityFormat);
-    }
-
-    // Clip support - use download-sections with forced keyframes to prevent frozen video
-    if (options.clips && options.clips.length > 0) {
-      for (const clip of options.clips) {
-        const start = Math.max(0, clip.start);
-        const end = Math.max(start + 1, clip.end);
-        args.push('--download-sections', `*${start}-${end}`);
-      }
-      if (!options.extractAudio) {
-        // Force keyframes at cuts so video stream starts cleanly with no frozen frames
-        args.push('--force-keyframes-at-cuts');
-      }
-      // Pass -short_seek_size 1 to FFmpeg input so it reconnects with HTTP Range requests
-      // instead of soft-seeking/draining remote DASH streams over HTTP
-      args.push('--downloader-args', 'ffmpeg_i:-short_seek_size 1');
-    }
-
-    // Output path
-    if (options.outputPath) {
-      let outputTemplate = '%(title)s.%(ext)s';
-      if (options.clips && options.clips.length > 0) {
-        outputTemplate = '%(title)s - %(section_start)s-%(section_end)s.%(ext)s';
-      }
-      args.push('--output', join(options.outputPath, outputTemplate));
-    }
-
-    // Container format - merge & remux to MP4 by default for video/clip downloads
-    if (!options.extractAudio) {
-      const container = options.videoFormat || 'mp4';
-      args.push('--merge-output-format', container);
-      args.push('--remux-video', container);
-    }
-
-    // Common flags
-    args.push('--newline', '--force-overwrites', '--restrict-filenames');
-    args.push('--no-check-certificates');
-    args.push(...this.getCommonExtractionArgs());
-    
-    // Fix echo issues by preventing multiple audio streams from being mixed incorrectly
-    // or by forcing a single audio stream if possible.
-    if (options.extractAudio) {
-      args.push('--audio-multistreams'); // Allow multiple streams but we specify format above
-    } else {
-      args.push('--no-audio-multistreams');
-    }
-
-    if (this.ffmpegPath) {
-      args.push('--ffmpeg-location', this.ffmpegPath);
-    }
-
-    if (options.isPlaylist) {
-      args.push('--yes-playlist');
-    }
-
-    // URL (always last)
-    args.push(options.url);
-
-    return args;
+    return buildDownloadArgs(options, {
+      ffmpegPath: this.ffmpegPath,
+      jsRuntimes: this.jsRuntimes,
+    });
   }
 
   async updateYtDlp(): Promise<{ success: boolean; message: string }> {
