@@ -19,12 +19,17 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
-      "@/stores/*": ["src/renderer/stores/*"],
+      "@/engine/*": ["src/engine/*"],
+      "@/engine": ["src/engine/index.ts"],
+      "@/stores/*": ["src/stores/*", "src/renderer/stores/*"],
+      "@/ui/*": ["src/ui/*", "src/renderer/*"],
+      "@/types/*": ["src/types/*"],
+      "@/types": ["src/types/index.ts"],
       "@/components/*": ["src/renderer/components/*"],
       "@/views/*": ["src/renderer/views/*"],
       "@/ipc/*": ["src/renderer/ipc/*"]
     }
   },
-  "include": ["src"],
+  "include": ["src", "tests"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

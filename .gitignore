@@ -236,3 +236,7 @@ Thumbs.db
 # .superpowers (brainstorming session files)
 .superpowers/
 
+# Teamwork agent metadata
+.agents/
+
+

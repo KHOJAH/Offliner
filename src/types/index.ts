@@ -1,5 +1,9 @@
 // src/types/index.ts
 
+export * from './engine';
+
+export type AppTheme = 'light' | 'dark' | 'monochrome';
+
 // === IPC Types ===
 
 export interface CommandMessage {
