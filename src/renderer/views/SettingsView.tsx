@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { useThemeStore } from '@/renderer/stores/themeStore';
 import { useUIStore } from '@/stores/uiStore';
 import { ipcClient } from '@/ipc/client';
 
 export default function SettingsView() {
   const settings = useSettingsStore();
+  const currentTheme = useThemeStore((s) => s.theme);
+  const setTheme = useThemeStore((s) => s.setTheme);
   const addToast = useUIStore((s) => s.addToast);
   const [updateInfo, setUpdateInfo] = useState<{ version: string; releaseNotes?: string } | null>(null);
   const [checkingUpdate, setCheckingUpdate] = useState(false);
@@ -83,14 +86,17 @@ export default function SettingsView() {
               THEME
             </label>
             <div style={{ display: 'flex', gap: 12 }}>
-              {(['dark', 'light'] as const).map((theme) => (
+              {(['light', 'dark', 'monochrome'] as const).map((themeName) => (
                 <button
-                  key={theme}
-                  className={settings.theme === theme ? 'btn btn-primary' : 'btn'}
-                  onClick={() => settings.updateSettings({ theme })}
+                  key={themeName}
+                  className={currentTheme === themeName ? 'btn btn-primary' : 'btn'}
+                  onClick={() => {
+                    setTheme(themeName);
+                    settings.updateSettings({ theme: themeName });
+                  }}
                   style={{ flex: 1, padding: '10px' }}
                 >
-                  {theme.charAt(0).toUpperCase() + theme.slice(1)}
+                  {themeName.charAt(0).toUpperCase() + themeName.slice(1)}
                 </button>
               ))}
             </div>
