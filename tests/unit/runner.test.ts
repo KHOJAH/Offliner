@@ -82,6 +82,30 @@ describe('IProcessRunner Engine Architecture', () => {
       await expect(handle.wait()).rejects.toThrow();
       expect(onError).toHaveBeenCalled();
     });
+
+    it('terminates a process spawned with detached: false via kill()', async () => {
+      const handle = runner.spawnStream(
+        process.execPath,
+        ['-e', 'setInterval(() => {}, 1000);'],
+        undefined,
+        { detached: false }
+      );
+      expect(handle.pid).toBeDefined();
+      await handle.kill('SIGKILL');
+      const result = await handle.wait();
+      expect(result.exitCode).toBe(137);
+    });
+
+    it('terminates a running process via SIGINT and returns exitCode 130', async () => {
+      const handle = runner.spawnStream(
+        process.execPath,
+        ['-e', 'setInterval(() => {}, 1000);']
+      );
+      await new Promise((r) => setTimeout(r, 50));
+      await handle.kill('SIGINT');
+      const result = await handle.wait();
+      expect(result.exitCode).toBe(130);
+    });
   });
 
   describe('MockProcessRunner', () => {
@@ -234,6 +258,25 @@ describe('IProcessRunner Engine Architecture', () => {
       const resErr = await mock.exec('err', []);
       expect(resErr.stderr).toContain('ERROR: Video unavailable');
       expect(resErr.exitCode).toBe(1);
+    });
+
+    it('normalizes signal exit codes correctly (SIGINT=130, SIGTERM=143, SIGKILL=137)', async () => {
+      mock.onCommand('signal-test', { stdoutChunks: ['running'], delayMs: 200 });
+
+      const h1 = mock.spawnStream('signal-test', []);
+      await h1.kill('SIGINT');
+      const r1 = await h1.wait();
+      expect(r1.exitCode).toBe(130);
+
+      const h2 = mock.spawnStream('signal-test', []);
+      await h2.kill('SIGTERM');
+      const r2 = await h2.wait();
+      expect(r2.exitCode).toBe(143);
+
+      const h3 = mock.spawnStream('signal-test', []);
+      await h3.kill('SIGKILL');
+      const r3 = await h3.wait();
+      expect(r3.exitCode).toBe(137);
     });
   });
 

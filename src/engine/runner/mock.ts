@@ -37,6 +37,9 @@ export class MockProcessHandle implements IProcessHandle {
       this._rejectWait = reject;
     });
 
+    // Suppress unhandled promise rejection warnings if consumer only uses callbacks or awaits wait() later
+    this._waitPromise.catch(() => {});
+
     this.start();
   }
 
@@ -57,7 +60,12 @@ export class MockProcessHandle implements IProcessHandle {
     }
     this._timers.clear();
 
-    const exitCode = signal === 'SIGTERM' ? 143 : 137;
+    const exitCode =
+      signal === 'SIGTERM'
+        ? 143
+        : signal === 'SIGINT'
+          ? 130
+          : 137;
     this._isDone = true;
     this.callbacks?.onExit?.(exitCode, signal);
     this._resolveWait({
@@ -179,17 +187,27 @@ export class MockProcessRunner implements IProcessRunner {
     response: MockProcessResponse | ((cmd: string, args: string[]) => MockProcessResponse),
     times: number = Infinity
   ): this {
+    const fullCmdFn = (cmd: string, args: string[]) =>
+      args.length > 0 ? `${cmd} ${args.join(' ')}` : cmd;
+
     let matchFn: (cmd: string, args: string[]) => boolean;
 
     if (typeof matcher === 'string') {
-      matchFn = (cmd, args) => cmd === matcher || `${cmd} ${args.join(' ')}`.includes(matcher);
+      matchFn = (cmd, args) => {
+        const fullCmd = fullCmdFn(cmd, args);
+        if (fullCmd === matcher) return true;
+        if (matcher.includes(' ') && fullCmd.startsWith(matcher + ' ')) return true;
+        if (args.includes(matcher)) return true;
+        if (!matcher.includes(' ') && cmd === matcher) return true;
+        return false;
+      };
     } else if (matcher instanceof RegExp) {
-      matchFn = (cmd, args) => matcher.test(`${cmd} ${args.join(' ')}`);
+      matchFn = (cmd, args) => matcher.test(fullCmdFn(cmd, args));
     } else {
       matchFn = matcher;
     }
 
-    this.rules.push({ match: matchFn, response, times });
+    this.rules.push({ match: matchFn, response, times, matcher });
     return this;
   }
 
@@ -213,26 +231,73 @@ export class MockProcessRunner implements IProcessRunner {
     this.strict = false;
   }
 
+  private calculateMatchScore(
+    rule: MockResponseRule,
+    command: string,
+    args: string[],
+    fullCmd: string
+  ): number {
+    const matcher = rule.matcher;
+
+    if (matcher !== undefined) {
+      if (typeof matcher === 'function') {
+        return matcher(command, args) ? 2 : 0;
+      }
+      if (matcher instanceof RegExp) {
+        return matcher.test(fullCmd) ? 2 : 0;
+      }
+      if (typeof matcher === 'string') {
+        // Level 3: Exact full command string match
+        if (fullCmd === matcher) return 3;
+        // Level 2: Subcommand prefix with space boundary
+        if (matcher.includes(' ') && fullCmd.startsWith(matcher + ' ')) return 2;
+        // Level 2: Exact token match in arguments
+        if (args.includes(matcher)) return 2;
+        // Level 1: Base command name match
+        if (!matcher.includes(' ') && command === matcher) return 1;
+        return 0;
+      }
+    }
+
+    // Fallback for custom rules registered directly via registerRule()
+    return rule.match(command, args) ? 2 : 0;
+  }
+
   private resolveResponse(command: string, args: string[]): MockProcessResponse {
     if (this.responseQueue.length > 0) {
       return this.responseQueue.shift()!;
     }
 
+    const fullCmd = args.length > 0 ? `${command} ${args.join(' ')}` : command;
+
+    let bestRuleIndex = -1;
+    let highestScore = 0;
+
     for (let i = 0; i < this.rules.length; i++) {
-      const rule = this.rules[i];
-      if (rule.match(command, args)) {
-        if (rule.times !== undefined && rule.times !== Infinity) {
-          rule.times--;
-          if (rule.times <= 0) {
-            this.rules.splice(i, 1);
-          }
+      const score = this.calculateMatchScore(this.rules[i], command, args, fullCmd);
+      if (score > highestScore) {
+        highestScore = score;
+        bestRuleIndex = i;
+        if (score === 3) {
+          // Maximum specificity reached; early exit preserving FIFO registration order
+          break;
         }
-        return typeof rule.response === 'function' ? rule.response(command, args) : rule.response;
       }
     }
 
+    if (bestRuleIndex !== -1) {
+      const rule = this.rules[bestRuleIndex];
+      if (rule.times !== undefined && rule.times !== Infinity) {
+        rule.times--;
+        if (rule.times <= 0) {
+          this.rules.splice(bestRuleIndex, 1);
+        }
+      }
+      return typeof rule.response === 'function' ? rule.response(command, args) : rule.response;
+    }
+
     if (this.strict) {
-      throw new Error(`MockProcessRunner [STRICT]: No mock response registered for "${command} ${args.join(' ')}"`);
+      throw new Error(`MockProcessRunner [STRICT]: No mock response registered for "${fullCmd}"`);
     }
 
     return this.defaultResponse;

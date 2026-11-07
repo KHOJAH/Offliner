@@ -52,6 +52,7 @@ export interface MockResponseRule {
   match: (command: string, args: string[]) => boolean;
   response: MockProcessResponse | ((command: string, args: string[]) => MockProcessResponse);
   times?: number;
+  matcher?: string | RegExp | ((command: string, args: string[]) => boolean);
 }
 
 export interface ProcessInvocation {

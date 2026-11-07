@@ -18,12 +18,15 @@ class RealProcessHandle implements IProcessHandle {
   private _waitPromise: Promise<ProcessResult>;
   private isClosed = false;
   private isKilled = false;
+  private isDetached: boolean;
 
   constructor(
     child: ChildProcess,
-    callbacks?: StreamCallbacks
+    callbacks?: StreamCallbacks,
+    options?: ProcessOptions
   ) {
     this.child = child;
+    this.isDetached = options?.detached ?? (process.platform !== 'win32');
 
     this._waitPromise = new Promise((resolve, reject) => {
       let stdoutAccum = '';
@@ -77,6 +80,9 @@ class RealProcessHandle implements IProcessHandle {
         });
       });
     });
+
+    // Suppress unhandled promise rejection warnings if consumer only uses callbacks or awaits wait() later
+    this._waitPromise.catch(() => {});
   }
 
   get pid(): number | undefined {
@@ -111,13 +117,15 @@ class RealProcessHandle implements IProcessHandle {
         }
       });
     } else {
-      try {
-        // Detached processes on POSIX form a process group with PGID = PID
-        process.kill(-this.child.pid, signal as NodeJS.Signals);
-      } catch (err: any) {
-        if (err.code !== 'ESRCH') {
+      if (this.isDetached) {
+        try {
+          // Detached processes on POSIX form a process group with PGID = PID
+          process.kill(-this.child.pid, signal as NodeJS.Signals);
+        } catch {
           try { this.child.kill(signal as NodeJS.Signals); } catch {}
         }
+      } else {
+        try { this.child.kill(signal as NodeJS.Signals); } catch {}
       }
     }
   }
@@ -145,7 +153,7 @@ export class RealProcessRunner implements IProcessRunner {
       shell: options?.shell ?? false,
     });
 
-    return new RealProcessHandle(child, callbacks);
+    return new RealProcessHandle(child, callbacks, options);
   }
 
   async exec(
