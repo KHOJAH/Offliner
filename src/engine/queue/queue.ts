@@ -116,9 +116,14 @@ export class DownloadQueueEngine extends EventEmitter {
   private processPending(): void {
     if (this.active.size >= this.concurrency) return;
 
-    // Search for first non-paused item in pending queue
+    // Prune stale non-pending items from pending array
+    this.pending = this.pending.filter(
+      (item) => item.status === 'queued' || item.status === 'paused'
+    );
+
+    // Search for first non-paused queued item in pending queue
     const nextIdx = this.pending.findIndex(
-      (item) => !this.paused.has(item.id) && item.status !== 'paused'
+      (item) => !this.paused.has(item.id) && item.status === 'queued'
     );
 
     if (nextIdx === -1) {
@@ -142,8 +147,6 @@ export class DownloadQueueEngine extends EventEmitter {
     this.emit('item:started', item.toSnapshot());
     this.emitStatus();
 
-    const args = this.buildArgs(item.options, item.isResumed);
-
     const callbacks = {
       onProgress: (progress: DownloadProgress) => {
         this.options.onProgress?.(item.id, progress);
@@ -162,22 +165,32 @@ export class DownloadQueueEngine extends EventEmitter {
       },
     };
 
-    item
-      .start(
-        this.runner,
-        this.binaryPath,
-        args,
-        callbacks,
-        this.progressParser
-      )
-      .catch(() => {
-        // Errors are already handled via callbacks & state
-      })
-      .finally(() => {
-        this.active.delete(item.id);
-        this.emitStatus();
-        this.processPending();
-      });
+    try {
+      const args = this.buildArgs(item.options, item.isResumed);
+
+      item
+        .start(
+          this.runner,
+          this.binaryPath,
+          args,
+          callbacks,
+          this.progressParser
+        )
+        .catch(() => {
+          // Errors are already handled via callbacks & state
+        })
+        .finally(() => {
+          this.active.delete(item.id);
+          this.emitStatus();
+          this.processPending();
+        });
+    } catch (err: any) {
+      const errMsg = err?.message || String(err);
+      item.fail(errMsg, callbacks);
+      this.active.delete(item.id);
+      this.emitStatus();
+      this.processPending();
+    }
   }
 
   private buildArgs(opts: QueueItemOptions, isResume: boolean): string[] {
@@ -209,13 +222,22 @@ export class DownloadQueueEngine extends EventEmitter {
 
   async pause(id: string): Promise<boolean> {
     const item = this.items.get(id);
-    if (!item) return false;
+    if (!item || item.status === 'cancelled' || item.status === 'done' || item.status === 'error') {
+      return false;
+    }
 
     this.paused.add(id);
 
     if (this.active.has(id)) {
       this.active.delete(id);
       await item.pause();
+
+      // Guard against concurrent cancellation during await item.pause()
+      if ((item.status as DownloadStatus) === 'cancelled' || !this.items.has(id)) {
+        this.paused.delete(id);
+        return false;
+      }
+
       // Place at head of pending queue for prioritized resumption
       this.pending.unshift(item);
       this.emit('item:paused', id, item.progress);
@@ -226,6 +248,10 @@ export class DownloadQueueEngine extends EventEmitter {
 
     if (item.status === 'queued') {
       await item.pause();
+      if ((item.status as DownloadStatus) === 'cancelled' || !this.items.has(id)) {
+        this.paused.delete(id);
+        return false;
+      }
       this.emit('item:paused', id, item.progress);
       this.emitStatus();
       return true;
@@ -274,6 +300,7 @@ export class DownloadQueueEngine extends EventEmitter {
     await item.cancel();
     this.emit('item:cancelled', id);
     this.emitStatus();
+    this.processPending();
     return true;
   }
 
@@ -311,9 +338,11 @@ export class DownloadQueueEngine extends EventEmitter {
   // === Batch Operations ===
 
   async pauseAll(): Promise<void> {
-    // 1. Mark ALL items as paused immediately so processPending cannot pick them up
+    // 1. Mark all active and queued items as paused immediately so processPending cannot pick them up
     for (const item of this.items.values()) {
-      this.paused.add(item.id);
+      if (item.status === 'downloading' || item.status === 'queued') {
+        this.paused.add(item.id);
+      }
     }
 
     const activeItems = Array.from(this.active.values());
@@ -321,6 +350,9 @@ export class DownloadQueueEngine extends EventEmitter {
 
     for (const item of activeItems) {
       await item.pause();
+      if (item.status === 'cancelled' || !this.items.has(item.id)) {
+        continue;
+      }
       this.pending.unshift(item);
       this.emit('item:paused', item.id, item.progress);
     }
@@ -330,6 +362,14 @@ export class DownloadQueueEngine extends EventEmitter {
       if (item.status === 'queued') {
         await item.pause();
         this.emit('item:paused', item.id, item.progress);
+      }
+    }
+
+    // Purge any items from this.paused that were cancelled or removed concurrently
+    for (const id of this.paused) {
+      const it = this.items.get(id);
+      if (!it || it.status !== 'paused') {
+        this.paused.delete(id);
       }
     }
 
@@ -353,23 +393,20 @@ export class DownloadQueueEngine extends EventEmitter {
   }
 
   async cancelAll(): Promise<void> {
-    const activeItems = Array.from(this.active.values());
-    const pendingItems = [...this.pending];
-
     this.active.clear();
     this.pending = [];
     this.paused.clear();
 
-    for (const item of pendingItems) {
+    const cancellable = Array.from(this.items.values()).filter(
+      (item) => item.status !== 'done' && item.status !== 'cancelled' && item.status !== 'error'
+    );
+
+    for (const item of cancellable) {
       await item.cancel();
       this.emit('item:cancelled', item.id);
     }
 
-    for (const item of activeItems) {
-      await item.cancel();
-      this.emit('item:cancelled', item.id);
-    }
-
+    this.paused.clear();
     this.emitStatus();
   }
 
@@ -406,7 +443,7 @@ export class DownloadQueueEngine extends EventEmitter {
 
     return {
       active: this.active.size,
-      queued: this.pending.filter((p) => !this.paused.has(p.id) && p.status !== 'paused').length,
+      queued: this.pending.filter((p) => !this.paused.has(p.id) && p.status === 'queued').length,
       paused,
       done,
       error,

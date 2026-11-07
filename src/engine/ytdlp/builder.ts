@@ -126,7 +126,7 @@ export function buildDownloadArgs(
   if (options.clips && options.clips.length > 0) {
     for (const clip of options.clips) {
       const start = Math.max(0, clip.start);
-      const end = Math.max(start + 1, clip.end);
+      const end = clip.end > start ? clip.end : start + 1;
       args.push('--download-sections', `*${start}-${end}`);
     }
     if (!isAudio) {
@@ -211,8 +211,8 @@ export function buildDownloadArgs(
     args.push(...options.extraArgs);
   }
 
-  // 14. URL (always final)
-  args.push(options.url);
+  // 14. URL (always final, preceded by POSIX end-of-options delimiter to prevent option injection)
+  args.push('--', options.url);
 
   return args;
 }
@@ -254,6 +254,7 @@ export function buildMetadataArgs(
     args.push(...options.extraArgs);
   }
 
-  args.push(url);
+  // URL (preceded by POSIX end-of-options delimiter to prevent option injection)
+  args.push('--', url);
   return args;
 }

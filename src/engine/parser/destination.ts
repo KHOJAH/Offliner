@@ -57,17 +57,7 @@ export function parseDestinationLine(line: string): DestinationInfo | null {
     };
   }
 
-  // 5. Already downloaded destination
-  const alreadyMatch = clean.match(/\[download\]\s+(.+?)\s+has already been downloaded/i);
-  if (alreadyMatch && alreadyMatch[1]) {
-    return {
-      filePath: cleanPath(alreadyMatch[1]),
-      operation: 'already_downloaded',
-      isFinal: true,
-    };
-  }
-
-  // 6. Fixup M4A container
+  // 5. Fixup M4A container
   const fixupMatch = clean.match(/\[FixupM4a\]\s+Correcting container in\s+"([^"]+)"/i);
   if (fixupMatch && fixupMatch[1]) {
     return {
@@ -77,13 +67,25 @@ export function parseDestinationLine(line: string): DestinationInfo | null {
     };
   }
 
-  // 7. Standard stream download destination (may be intermediate DASH stream like .f137.mp4)
+  // 6. Standard stream download destination (must precede already-downloaded check)
   const dlMatch = clean.match(/\[download\]\s+Destination:\s+(.+)$/i);
   if (dlMatch && dlMatch[1]) {
     return {
       filePath: cleanPath(dlMatch[1]),
       operation: 'download',
       isFinal: false,
+    };
+  }
+
+  // 7. Already downloaded destination (ensuring active Destination: lines do not match)
+  const alreadyMatch = clean.match(
+    /^\[download\]\s+(?!Destination:\s+)(.+?)\s+has already been downloaded(?:\s+and recorded in the archive)?$/i
+  );
+  if (alreadyMatch && alreadyMatch[1]) {
+    return {
+      filePath: cleanPath(alreadyMatch[1]),
+      operation: 'already_downloaded',
+      isFinal: true,
     };
   }
 

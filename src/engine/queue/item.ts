@@ -150,67 +150,79 @@ export class QueueItem {
         }
       };
 
-      this._handle = runner.spawnStream(binaryPath, args, {
-        onStdoutChunk: (chunk: string) => {
-          handleChunk(chunk);
-        },
-        onStderrChunk: (chunk: string) => {
-          handleChunk(chunk);
-        },
-        onError: (err: Error) => {
-          cleanup();
-          if (this._intent === 'pause' || this._intent === 'cancel') return;
-          this._errorMessage = err.message;
-          this.setStatus('error', callbacks);
-          callbacks.onError(err.message);
-          if (!resolved) {
-            resolved = true;
-            reject(err);
-          }
-        },
-        onExit: (code: number) => {
-          cleanup();
-
-          if (this._intent === 'pause') {
-            this.setStatus('paused', callbacks);
-            if (!resolved) {
-              resolved = true;
-              resolve(this._filePath);
-            }
-            return;
-          }
-
-          if (this._intent === 'cancel') {
-            this.setStatus('cancelled', callbacks);
-            if (!resolved) {
-              resolved = true;
-              resolve(this._filePath);
-            }
-            return;
-          }
-
-          if (code === 0) {
-            this.completedAt = Date.now();
-            this._lastProgress.percent = 100;
-            this.setStatus('done', callbacks);
-            const resultPath = this._filePath || this.options.outputPath || '';
-            callbacks.onDone(resultPath);
-            if (!resolved) {
-              resolved = true;
-              resolve(resultPath);
-            }
-          } else {
-            const msg = `Download process exited with code ${code}`;
-            this._errorMessage = msg;
+      try {
+        this._handle = runner.spawnStream(binaryPath, args, {
+          onStdoutChunk: (chunk: string) => {
+            handleChunk(chunk);
+          },
+          onStderrChunk: (chunk: string) => {
+            handleChunk(chunk);
+          },
+          onError: (err: Error) => {
+            cleanup();
+            if (this._intent === 'pause' || this._intent === 'cancel') return;
+            this._errorMessage = err.message;
             this.setStatus('error', callbacks);
-            callbacks.onError(msg);
+            callbacks.onError(err.message);
             if (!resolved) {
               resolved = true;
-              reject(new Error(msg));
+              reject(err);
             }
-          }
-        },
-      });
+          },
+          onExit: (code: number) => {
+            cleanup();
+
+            if (this._intent === 'cancel') {
+              this.setStatus('cancelled', callbacks);
+              if (!resolved) {
+                resolved = true;
+                resolve(this._filePath);
+              }
+              return;
+            }
+
+            if (this._intent === 'pause') {
+              this.setStatus('paused', callbacks);
+              if (!resolved) {
+                resolved = true;
+                resolve(this._filePath);
+              }
+              return;
+            }
+
+            if (code === 0) {
+              this.completedAt = Date.now();
+              this._lastProgress.percent = 100;
+              this.setStatus('done', callbacks);
+              const resultPath = this._filePath || this.options.outputPath || '';
+              callbacks.onDone(resultPath);
+              if (!resolved) {
+                resolved = true;
+                resolve(resultPath);
+              }
+            } else {
+              const msg = `Download process exited with code ${code}`;
+              this._errorMessage = msg;
+              this.setStatus('error', callbacks);
+              callbacks.onError(msg);
+              if (!resolved) {
+                resolved = true;
+                reject(new Error(msg));
+              }
+            }
+          },
+        });
+      } catch (err: any) {
+        cleanup();
+        const msg = err?.message || String(err);
+        this._errorMessage = msg;
+        this.setStatus('error', callbacks);
+        callbacks.onError(msg);
+        if (!resolved) {
+          resolved = true;
+          reject(err);
+        }
+      }
     });
   }
 
@@ -260,7 +272,8 @@ export class QueueItem {
     if (
       this._status === 'paused' ||
       this._status === 'done' ||
-      this._status === 'cancelled'
+      this._status === 'cancelled' ||
+      this._intent === 'cancel'
     ) {
       return;
     }
@@ -282,13 +295,23 @@ export class QueueItem {
   async cancel(): Promise<void> {
     if (this._status === 'cancelled') return;
 
+    this._intent = 'cancel';
     if (this._handle) {
-      this._intent = 'cancel';
       // Fast termination
       await this._handle.kill('SIGKILL');
     } else {
       this._status = 'cancelled';
     }
+  }
+
+  fail(errorMessage: string, callbacks?: ItemCallbacks): void {
+    if (this._handle) {
+      this._handle.kill('SIGKILL').catch(() => {});
+      this._handle = null;
+    }
+    this._errorMessage = errorMessage;
+    this.setStatus('error', callbacks);
+    callbacks?.onError(errorMessage);
   }
 
   prepareForResume(): void {

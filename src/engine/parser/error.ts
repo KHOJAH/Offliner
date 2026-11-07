@@ -5,6 +5,7 @@
 
 import { stripAnsi } from './progress';
 import type { ParsedError, ErrorCategory } from './types';
+export type { ParsedError, ErrorCategory };
 
 interface ErrorPatternDef {
   category: ErrorCategory;
