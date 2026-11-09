@@ -1,21 +1,21 @@
 // src/renderer/stores/settingsStore.ts
 import { create } from 'zustand';
-import type { Settings } from '@/types';
+import type { Settings, AppTheme } from '@/types';
 import { ipcClient } from '@/renderer/ipc/client';
 
-interface SettingsState extends Settings {
+interface SettingsState extends Settings<AppTheme> {
   loadSettings: () => Promise<void>;
-  updateSettings: (partial: Partial<Settings>) => Promise<void>;
+  updateSettings: (partial: Partial<Settings<AppTheme>>) => Promise<void>;
 }
 
-const defaults: Settings = {
+const defaults: Settings<AppTheme> = {
   downloadPath: '',
   defaultVideoFormat: '137+140',
   defaultAudioFormat: 'mp3',
   defaultQuality: '1080p',
   concurrency: 3,
   autoUpdate: true,
-  theme: 'glass',
+  theme: 'dark',
   maxClipDuration: 3600,
 };
 

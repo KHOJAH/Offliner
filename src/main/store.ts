@@ -1,26 +1,26 @@
 // src/main/store.ts
 import Store from 'electron-store';
-import type { Settings, DownloadItem } from '@/types';
+import type { Settings, DownloadItem, AppTheme } from '@/types';
 import { app } from 'electron';
 import { join } from 'path';
 
-const defaults: Settings = {
+const defaults: Settings<AppTheme> = {
   downloadPath: join(app.getPath('downloads'), 'Offliner'),
   defaultVideoFormat: 'bestvideo+bestaudio/best', 
   defaultAudioFormat: 'flac',
   defaultQuality: '1080p',
   concurrency: 3,
   autoUpdate: true,
-  theme: 'glass',
+  theme: 'dark',
   maxClipDuration: 3600,
 };
 
-let settingsStore: Store<Settings>;
+let settingsStore: Store<Settings<AppTheme>>;
 let downloadsStore: Store<{ downloads: DownloadItem[] }>;
 
-export function getSettingsStore(): Store<Settings> {
+export function getSettingsStore(): Store<Settings<AppTheme>> {
   if (!settingsStore) {
-    settingsStore = new Store<Settings>({
+    settingsStore = new Store<Settings<AppTheme>>({
       name: 'settings',
       defaults,
       cwd: app.getPath('userData'),
@@ -40,14 +40,14 @@ export function getDownloadsStore(): Store<{ downloads: DownloadItem[] }> {
   return downloadsStore;
 }
 
-export function getSettings(): Settings {
+export function getSettings(): Settings<AppTheme> {
   const s = getSettingsStore();
-  return s.store as Settings;
+  return s.store as Settings<AppTheme>;
 }
 
-export function updateSettings(partial: Partial<Settings>): void {
+export function updateSettings(partial: Partial<Settings<AppTheme>>): void {
   const s = getSettingsStore();
-  const current = s.store as Settings;
+  const current = s.store as Settings<AppTheme>;
   s.set({ ...current, ...partial });
 }
 

@@ -13,8 +13,8 @@ export default function ClipTimeline({ duration, start, end, onStartChange, onEn
   const trackRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState<'start' | 'end' | null>(null);
 
-  const startPercent = (start / duration) * 100;
-  const endPercent = (end / duration) * 100;
+  const startPercent = duration > 0 ? Math.max(0, Math.min(100, (start / duration) * 100)) : 0;
+  const endPercent = duration > 0 ? Math.max(0, Math.min(100, (end / duration) * 100)) : 0;
 
   const handleMouseDown = (type: 'start' | 'end') => (e: React.MouseEvent) => {
     e.preventDefault();
@@ -50,64 +50,74 @@ export default function ClipTimeline({ duration, start, end, onStartChange, onEn
   }, [dragging, duration, end, onEndChange, onStartChange, start]);
 
   return (
-    <div style={{ marginTop: 12 }}>
+    <div className="mt-3">
       <div
         ref={trackRef}
+        className="relative h-10 rounded-xl overflow-hidden cursor-pointer border border-[var(--border-hairline)]"
         style={{
-          position: 'relative',
-          height: 40,
-          background: 'rgba(255,255,255,0.05)',
-          borderRadius: 8,
-          cursor: 'pointer',
+          background: 'var(--bg-surface-elevated)',
         }}
       >
+        {/* Subtle grid pattern / waveform placeholder */}
+        <div className="absolute inset-0 opacity-15 flex items-center justify-around pointer-events-none px-2">
+          {Array.from({ length: 48 }).map((_, i) => (
+            <div
+              key={i}
+              className="w-0.5 rounded-full bg-[var(--text-tertiary)]"
+              style={{ height: `${20 + ((i * 17) % 65)}%` }}
+            />
+          ))}
+        </div>
+
         {/* Selected region */}
-        <div style={{
-          position: 'absolute',
-          left: `${startPercent}%`,
-          width: `${endPercent - startPercent}%`,
-          height: '100%',
-          background: 'rgba(99, 102, 241, 0.3)',
-          borderRadius: 8,
-        }} />
+        <div
+          className="absolute top-0 bottom-0 border-y border-[var(--accent)]"
+          style={{
+            left: `${startPercent}%`,
+            width: `${Math.max(0, endPercent - startPercent)}%`,
+            background: 'var(--accent-subtle)',
+          }}
+        />
 
         {/* Start handle */}
         <div
           onMouseDown={handleMouseDown('start')}
+          role="slider"
+          aria-label="Clip start handle"
+          aria-valuenow={start}
+          className="absolute top-0 bottom-0 w-3 rounded-l-md flex items-center justify-center cursor-ew-resize shadow-md z-10 transition-transform active:scale-105"
           style={{
-            position: 'absolute',
             left: `${startPercent}%`,
-            top: 0,
-            bottom: 0,
-            width: 4,
-            background: '#6366F1',
-            borderRadius: 4,
-            cursor: 'ew-resize',
-            transform: 'translateX(-2px)',
+            background: 'var(--accent)',
+            transform: 'translateX(-50%)',
           }}
-        />
+        >
+          <div className="w-0.5 h-4 rounded-full bg-[var(--accent-text)] opacity-70" />
+        </div>
 
         {/* End handle */}
         <div
           onMouseDown={handleMouseDown('end')}
+          role="slider"
+          aria-label="Clip end handle"
+          aria-valuenow={end}
+          className="absolute top-0 bottom-0 w-3 rounded-r-md flex items-center justify-center cursor-ew-resize shadow-md z-10 transition-transform active:scale-105"
           style={{
-            position: 'absolute',
             left: `${endPercent}%`,
-            top: 0,
-            bottom: 0,
-            width: 4,
-            background: '#6366F1',
-            borderRadius: 4,
-            cursor: 'ew-resize',
-            transform: 'translateX(-2px)',
+            background: 'var(--accent)',
+            transform: 'translateX(-50%)',
           }}
-        />
+        >
+          <div className="w-0.5 h-4 rounded-full bg-[var(--accent-text)] opacity-70" />
+        </div>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4, fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>
-        <span>{formatTime(start)}</span>
-        <span>Clip: {formatTime(end - start)}</span>
-        <span>{formatTime(duration)}</span>
+      <div className="flex justify-between items-center mt-1.5 text-xs font-mono text-[var(--text-secondary)]">
+        <span className="tabular-nums">{formatTime(start)}</span>
+        <span className="font-sans font-medium text-[var(--text-primary)] px-2 py-0.5 rounded-full bg-[var(--bg-surface-elevated)] border border-[var(--border-hairline)]">
+          Clip: <span className="font-mono text-[var(--accent)]">{formatTime(end - start)}</span>
+        </span>
+        <span className="tabular-nums">{formatTime(duration)}</span>
       </div>
     </div>
   );

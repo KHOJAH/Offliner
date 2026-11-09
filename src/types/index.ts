@@ -1,5 +1,9 @@
 // src/types/index.ts
 
+export * from './engine';
+
+export type AppTheme = 'light' | 'dark' | 'monochrome';
+
 // === IPC Types ===
 
 export interface CommandMessage {
@@ -105,14 +109,14 @@ export interface QueueStatus {
 
 // === Settings Types ===
 
-export interface Settings {
+export interface Settings<TTheme extends string = any> {
   downloadPath: string;
   defaultVideoFormat: string;
   defaultAudioFormat: string;
   defaultQuality: string;
   concurrency: number;
   autoUpdate: boolean;
-  theme: 'light' | 'dark' | 'glass';
+  theme: TTheme;
   maxClipDuration: number; // seconds, default 3600
 }
 

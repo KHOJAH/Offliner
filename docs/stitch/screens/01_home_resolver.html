@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offliner — Home & Link Resolver</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: ['class', '[data-theme="dark"], [data-theme="monochrome"]'],
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Text"', 'Inter', 'sans-serif'],
+            display: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', 'Inter', 'sans-serif'],
+          },
+          colors: {
+            app: 'var(--bg-app)',
+            surface: 'var(--bg-surface)',
+            'surface-subtle': 'var(--bg-surface-subtle)',
+            accent: 'var(--accent)',
+            'accent-hover': 'var(--accent-hover)',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root, [data-theme="light"] {
+      --bg-app: #FAFAF8;
+      --bg-surface: #FFFFFF;
+      --bg-surface-subtle: #F5F5F7;
+      --border-hairline: rgba(0, 0, 0, 0.08);
+      --border-subtle: rgba(0, 0, 0, 0.06);
+      --text-primary: #1D1D1F;
+      --text-secondary: #6E6E73;
+      --text-tertiary: #86868B;
+      --accent: #0071E3;
+      --accent-hover: #0077ED;
+      --accent-subtle: rgba(0, 113, 227, 0.10);
+      --accent-text: #FFFFFF;
+      --success: #34C759;
+      --warning: #FF9500;
+      --error: #FF3B30;
+      --glass-bg: rgba(255, 255, 255, 0.72);
+      --glass-border: rgba(0, 0, 0, 0.08);
+      --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    }
+    [data-theme="dark"] {
+      --bg-app: #0D0E11;
+      --bg-surface: #17181C;
+      --bg-surface-subtle: #222328;
+      --border-hairline: rgba(255, 255, 255, 0.08);
+      --border-subtle: rgba(255, 255, 255, 0.06);
+      --text-primary: #F5F5F7;
+      --text-secondary: #86868B;
+      --text-tertiary: #636366;
+      --accent: #2997FF;
+      --accent-hover: #40A2FF;
+      --accent-subtle: rgba(41, 151, 255, 0.15);
+      --accent-text: #FFFFFF;
+      --success: #30D158;
+      --warning: #FF9F0A;
+      --error: #FF453A;
+      --glass-bg: rgba(23, 24, 28, 0.75);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+    }
+    [data-theme="monochrome"] {
+      --bg-app: #000000;
+      --bg-surface: #121212;
+      --bg-surface-subtle: #1E1E1E;
+      --border-hairline: #262626;
+      --border-subtle: #333333;
+      --text-primary: #FFFFFF;
+      --text-secondary: #9E9E9E;
+      --text-tertiary: #666666;
+      --accent: #FFFFFF;
+      --accent-hover: #E0E0E0;
+      --accent-subtle: rgba(255, 255, 255, 0.12);
+      --accent-text: #000000;
+      --success: #FFFFFF;
+      --warning: #CCCCCC;
+      --error: #FFFFFF;
+      --glass-bg: rgba(18, 18, 18, 0.85);
+      --glass-border: #262626;
+      --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.8);
+    }
+    body {
+      background-color: var(--bg-app);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Inter", sans-serif;
+      transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .glass-panel {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-hairline);
+      box-shadow: var(--card-shadow);
+    }
+    .spring-btn {
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .spring-btn:hover {
+      transform: translateY(-1px);
+    }
+    .spring-btn:active {
+      transform: scale(0.97);
+    }
+  </style>
+</head>
+<body class="min-h-screen p-4 flex flex-col">
+  <!-- Top Navigation Bar -->
+  <nav class="glass-panel mx-auto w-full max-w-5xl h-14 rounded-2xl px-4 flex items-center justify-between sticky top-4 z-50">
+    <div class="flex items-center gap-4">
+      <div class="flex items-center gap-1.5">
+        <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
+        <div class="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+        <div class="w-3 h-3 rounded-full bg-green-500/80"></div>
+      </div>
+      <a href="01_home_resolver.html" class="font-extrabold tracking-tight text-base font-display text-[var(--accent)]">
+        OFFLINER
+      </a>
+    </div>
+
+    <!-- 7 Nav Tabs -->
+    <div class="flex items-center gap-1 text-[13px] font-medium">
+      <a href="01_home_resolver.html" class="px-3 py-1.5 rounded-lg flex items-center gap-1.5 bg-[var(--accent)] text-[var(--accent-text)] font-semibold shadow-sm">
+        <span>🏠</span><span>Home</span>
+      </a>
+      <a href="02_video_download.html" class="px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-subtle)] spring-btn">
+        <span>📹</span><span>Video</span>
+      </a>
+      <a href="03_audio_extract.html" class="px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-subtle)] spring-btn">
+        <span>🎵</span><span>Audio</span>
+      </a>
+      <a href="04_playlist_batch.html" class="px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-subtle)] spring-btn">
+        <span>📋</span><span>Playlist</span>
+      </a>
+      <a href="05_clips_trimmer.html" class="px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-subtle)] spring-btn">
+        <span>🎬</span><span>Clips</span>
+      </a>
+      <a href="06_queue_manager.html" class="px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-subtle)] spring-btn">
+        <span>⏱️</span><span>Queue</span>
+      </a>
+      <a href="07_settings.html" class="px-3 py-1.5 rounded-lg flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-subtle)] spring-btn">
+        <span>⚙️</span><span>Settings</span>
+      </a>
+    </div>
+
+    <!-- Live 3-State Theme Switcher -->
+    <div class="flex items-center bg-[var(--bg-surface-subtle)] p-1 rounded-xl border border-[var(--border-hairline)] text-xs">
+      <button onclick="setTheme('light')" data-theme-btn="light" class="theme-btn px-2.5 py-1 rounded-lg transition font-medium flex items-center gap-1">
+        ☀️ <span class="hidden sm:inline">Light</span>
+      </button>
+      <button onclick="setTheme('dark')" data-theme-btn="dark" class="theme-btn px-2.5 py-1 rounded-lg transition font-medium flex items-center gap-1">
+        🌙 <span class="hidden sm:inline">Dark</span>
+      </button>
+      <button onclick="setTheme('monochrome')" data-theme-btn="monochrome" class="theme-btn px-2.5 py-1 rounded-lg transition font-medium flex items-center gap-1">
+        ⬛ <span class="hidden sm:inline">Mono</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main View Container -->
+  <main class="flex-1 w-full max-w-4xl mx-auto py-10 flex flex-col justify-center">
+    <!-- Hero Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-5xl font-extrabold tracking-tight font-display mb-3 text-[var(--text-primary)]">
+        OFFLINER
+      </h1>
+      <p class="text-base text-[var(--text-secondary)] max-w-md mx-auto">
+        Universal media capture engine with precision trimming, lossless extraction, and batch queueing.
+      </p>
+    </div>
+
+    <!-- Universal Link Ingestion Box -->
+    <div class="glass-panel rounded-2xl p-3 mb-10 shadow-lg">
+      <form action="02_video_download.html" class="flex items-center gap-2">
+        <div class="relative flex-1">
+          <input
+            type="text"
+            id="url-input"
+            value="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+            placeholder="Paste YouTube video or playlist link..."
+            class="w-full h-12 pl-11 pr-24 rounded-xl bg-[var(--bg-surface-subtle)] text-[var(--text-primary)] text-sm border border-[var(--border-hairline)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] font-medium"
+          />
+          <span class="absolute left-4 top-3.5 text-base text-[var(--text-secondary)]">🔗</span>
+          <button
+            type="button"
+            onclick="document.getElementById('url-input').value = ''"
+            class="absolute right-3 top-2.5 px-2 py-1 text-xs rounded-md bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-hairline)] spring-btn"
+          >
+            Clear
+          </button>
+        </div>
+        <button
+          type="submit"
+          class="h-12 px-6 rounded-xl bg-[var(--accent)] text-[var(--accent-text)] font-semibold text-sm spring-btn shadow-md hover:opacity-95 flex items-center gap-2"
+        >
+          <span>Analyze URL</span>
+          <span>→</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- 3-Column Quick Action Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+      <a href="02_video_download.html" class="glass-panel p-5 rounded-2xl flex flex-col justify-between spring-btn hover:border-[var(--accent)] group">
+        <div>
+          <div class="w-10 h-10 rounded-xl bg-[var(--accent-subtle)] flex items-center justify-center text-xl mb-3">
+            📹
+          </div>
+          <h3 class="text-base font-semibold text-[var(--text-primary)] mb-1">Full HD Video</h3>
+          <p class="text-xs text-[var(--text-secondary)] leading-relaxed">
+            Download single streams up to 4K 60fps with seamless audio merging.
+          </p>
+        </div>
+        <div class="mt-4 text-xs font-semibold text-[var(--accent)] flex items-center gap-1 group-hover:translate-x-1 transition">
+          <span>Configure stream</span><span>→</span>
+        </div>
+      </a>
+
+      <a href="03_audio_extract.html" class="glass-panel p-5 rounded-2xl flex flex-col justify-between spring-btn hover:border-[var(--accent)] group">
+        <div>
+          <div class="w-10 h-10 rounded-xl bg-[var(--accent-subtle)] flex items-center justify-center text-xl mb-3">
+            🎵
+          </div>
+          <h3 class="text-base font-semibold text-[var(--text-primary)] mb-1">Studio Audio</h3>
+          <p class="text-xs text-[var(--text-secondary)] leading-relaxed">
+            Extract bit-perfect FLAC, MP3, or AAC with stepped quality compression.
+          </p>
+        </div>
+        <div class="mt-4 text-xs font-semibold text-[var(--accent)] flex items-center gap-1 group-hover:translate-x-1 transition">
+          <span>Extract audio</span><span>→</span>
+        </div>
+      </a>
+
+      <a href="05_clips_trimmer.html" class="glass-panel p-5 rounded-2xl flex flex-col justify-between spring-btn hover:border-[var(--accent)] group">
+        <div>
+          <div class="w-10 h-10 rounded-xl bg-[var(--accent-subtle)] flex items-center justify-center text-xl mb-3">
+            🎬
+          </div>
+          <h3 class="text-base font-semibold text-[var(--text-primary)] mb-1">Precision Clips</h3>
+          <p class="text-xs text-[var(--text-secondary)] leading-relaxed">
+            Cut segments with keyframe-accurate timeline scrubber and multi-clip queue.
+          </p>
+        </div>
+        <div class="mt-4 text-xs font-semibold text-[var(--accent)] flex items-center gap-1 group-hover:translate-x-1 transition">
+          <span>Open trimmer</span><span>→</span>
+        </div>
+      </a>
+    </div>
+
+    <!-- Recent Media Inspection Card -->
+    <div class="glass-panel rounded-2xl p-5">
+      <div class="flex items-center justify-between mb-4">
+        <h4 class="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)]">Recent Ingestion</h4>
+        <a href="06_queue_manager.html" class="text-xs font-semibold text-[var(--accent)] hover:underline">View queue (3 items)</a>
+      </div>
+      <div class="space-y-3">
+        <div class="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-surface-subtle)] border border-[var(--border-hairline)]">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-8 rounded-lg bg-neutral-800 flex items-center justify-center text-xs text-neutral-400 font-mono">
+              16:9
+            </div>
+            <div>
+              <p class="text-sm font-semibold text-[var(--text-primary)]">Cyberpunk 2077 — Night City Cinematic 4K</p>
+              <p class="text-xs text-[var(--text-secondary)]">Duration: 12:45 • Format: 2160p60 • MP4</p>
+            </div>
+          </div>
+          <a href="02_video_download.html" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[var(--bg-surface)] text-[var(--text-primary)] border border-[var(--border-hairline)] spring-btn">
+            Inspect
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    function setTheme(t) {
+      document.documentElement.setAttribute('data-theme', t);
+      localStorage.setItem('offliner_stitch_theme', t);
+      document.querySelectorAll('.theme-btn').forEach(b => {
+        const active = b.getAttribute('data-theme-btn') === t;
+        if (active) {
+          b.style.backgroundColor = 'var(--accent)';
+          b.style.color = 'var(--accent-text)';
+        } else {
+          b.style.backgroundColor = 'transparent';
+          b.style.color = 'var(--text-secondary)';
+        }
+      });
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      const saved = localStorage.getItem('offliner_stitch_theme') || 'dark';
+      setTheme(saved);
+    });
+  </script>
+</body>
+</html>

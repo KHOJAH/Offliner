@@ -44,24 +44,46 @@ export const useDownloadStore = create<DownloadState>((set, get) => ({
       const next = new Map(state.downloads);
       const existing = next.get(id);
       if (existing) {
-        let updatedStatus = data.status || existing.status;
-
-        // Final states: done, error, cancelled
         const isFinal = existing.status === 'done' || existing.status === 'error' || existing.status === 'cancelled';
-        
-        if (isFinal && data.status === 'downloading' && data.progress !== undefined) {
-          // Block transition from final to downloading if it's a progress event
-          updatedStatus = existing.status;
-        } else if (existing.status === 'paused' && data.status === 'downloading' && data.progress !== undefined) {
-          // Block transition from paused to downloading if it's a progress event
-          // This prevents delayed progress events from overwriting the paused state
+        const isPaused = existing.status === 'paused';
+
+        const isLateProgressChunk =
+          (isFinal && (data.status === 'downloading' || data.progress !== undefined || data.speed !== undefined || data.eta !== undefined)) ||
+          (isPaused && (data.progress !== undefined || (data.status === 'downloading' && data.progress !== undefined)));
+
+        let updatedStatus = data.status || existing.status;
+        if (isLateProgressChunk && data.status === 'downloading') {
           updatedStatus = existing.status;
         }
-        
-        const updated = { ...existing, ...data, status: updatedStatus };
+
+        const safeData = { ...data };
+        if (isLateProgressChunk) {
+          delete safeData.progress;
+          delete safeData.speed;
+          delete safeData.speedBps;
+          delete safeData.eta;
+          delete safeData.etaSeconds;
+          delete safeData.filePath;
+          if (updatedStatus === existing.status) {
+            delete safeData.status;
+          }
+        }
+
+        const monotonicProgress = safeData.progress !== undefined
+          ? Math.max(existing.progress, safeData.progress ?? 0)
+          : existing.progress;
+
+        const updated: DownloadItem = {
+          ...existing,
+          ...safeData,
+          progress: monotonicProgress,
+          status: updatedStatus,
+        };
+
         next.set(id, updated);
-        // Only save to disk for status changes or completion, not every progress tick
-        if (data.status || data.progress === 100) {
+        // Only save to disk for real status changes or completion, not every progress tick or late chunk
+        const statusChanged = updatedStatus !== existing.status;
+        if (statusChanged || (data.status && !isLateProgressChunk) || updated.progress === 100) {
           ipcClient.saveDownloads(Array.from(next.values()));
         }
       }
@@ -81,9 +103,13 @@ export const useDownloadStore = create<DownloadState>((set, get) => ({
     
     for (const d of list) {
       if (d.status === 'done' && d.filePath) {
-        const exists = await ipcClient.fileExists(d.filePath);
-        if (!exists) {
-          updateProgress(d.id, { status: 'cancelled' });
+        try {
+          const exists = await ipcClient.fileExists(d.filePath);
+          if (!exists) {
+            updateProgress(d.id, { status: 'cancelled' });
+          }
+        } catch {
+          // Ignore filesystem errors (e.g. disconnected drive, EPERM, network share drop)
         }
       }
     }

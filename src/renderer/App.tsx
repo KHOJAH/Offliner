@@ -4,6 +4,7 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useSettingsStore } from "@/renderer/stores/settingsStore";
+import { useThemeStore, applyThemeToDOM } from "@/renderer/stores/themeStore";
 import { useDownloadStore } from "@/renderer/stores/downloadStore";
 import { useUIStore } from "@/renderer/stores/uiStore";
 import TopNavBar from "@/renderer/components/TopNavBar";
@@ -22,13 +23,15 @@ import SettingsView from "@/renderer/views/SettingsView";
 function AppContent() {
   const location = useLocation();
   const loadSettings = useSettingsStore((s) => s.loadSettings);
-  const theme = useSettingsStore((s) => s.theme);
+  const initTheme = useThemeStore((s) => s.initTheme);
+  const theme = useThemeStore((s) => s.theme);
   const subscribeToEvents = useDownloadStore((s) => s.subscribeToEvents);
   const setActiveTab = useUIStore((s) => s.setActiveTab);
   const loadDownloads = useDownloadStore((s) => s.loadDownloads);
   const verifyDownloads = useDownloadStore((s) => s.verifyDownloads);
 
   useEffect(() => {
+    initTheme();
     loadSettings();
     loadDownloads();
     const cleanup = subscribeToEvents();
@@ -40,16 +43,16 @@ function AppContent() {
       cleanup();
       clearInterval(interval);
     };
-  }, [loadSettings, loadDownloads, verifyDownloads, subscribeToEvents]);
+  }, [initTheme, loadSettings, loadDownloads, verifyDownloads, subscribeToEvents]);
 
   // Update active tab in UI store based on current route
   useEffect(() => {
     setActiveTab(location.pathname);
   }, [location.pathname, setActiveTab]);
 
-  // Apply theme to html element
+  // Apply theme to html element and class list
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
+    applyThemeToDOM(theme);
   }, [theme]);
 
   // Helper function to render a view and apply active class based on current route
