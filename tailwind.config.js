@@ -65,6 +65,27 @@ module.exports = {
           warning: 'var(--warning)',
           error: 'var(--error)',
         },
+        traffic: {
+          close: 'var(--traffic-close)',
+          min: 'var(--traffic-min)',
+          max: 'var(--traffic-max)',
+        },
+        status: {
+          success: 'var(--status-success)',
+          warning: 'var(--status-warning)',
+          error: 'var(--status-error)',
+        },
+        swatch: {
+          'light-bg': 'var(--swatch-light-bg)',
+          'light-dot': 'var(--swatch-light-dot)',
+          'light-icon': 'var(--swatch-light-icon)',
+          'dark-bg': 'var(--swatch-dark-bg)',
+          'dark-dot': 'var(--swatch-dark-dot)',
+          'dark-icon': 'var(--swatch-dark-icon)',
+          'mono-bg': 'var(--swatch-mono-bg)',
+          'mono-dot': 'var(--swatch-mono-dot)',
+          'mono-icon': 'var(--swatch-mono-icon)',
+        },
         glass: {
           bg: 'var(--glass-bg)',
           border: 'var(--glass-border)',
@@ -72,6 +93,7 @@ module.exports = {
       },
       fontFamily: {
         sans: [
+          '"Plus Jakarta Sans"',
           '-apple-system',
           'BlinkMacSystemFont',
           '"SF Pro Text"',
@@ -85,6 +107,7 @@ module.exports = {
           'sans-serif',
         ],
         mono: [
+          '"JetBrains Mono"',
           '"SF Mono"',
           'ui-monospace',
           'Menlo',

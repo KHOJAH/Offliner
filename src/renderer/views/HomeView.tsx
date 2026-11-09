@@ -1,12 +1,9 @@
 // src/renderer/views/HomeView.tsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useThemeStore } from '@/renderer/stores/themeStore';
 
 export default function HomeView() {
   const navigate = useNavigate();
-  const theme = useThemeStore((s) => s.theme);
-  const isMonochrome = theme === 'monochrome';
   const [url, setUrl] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -47,11 +44,7 @@ export default function HomeView() {
         <div className="w-full max-w-3xl mx-auto flex flex-col items-center text-center relative z-10">
           {/* Overline Native Engine Badge */}
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container border border-outline-variant/30 mb-6 shadow-xs">
-            <span
-              className={`w-2 h-2 rounded-full ${
-                isMonochrome ? 'bg-white' : 'bg-emerald-500'
-              } animate-pulse`}
-            />
+            <span className="w-2 h-2 rounded-full bg-status-success animate-pulse" />
             <span className="text-[11px] font-semibold uppercase tracking-wider text-text-secondary">
               Native Engine Active
             </span>
@@ -244,11 +237,7 @@ export default function HomeView() {
           <div className="w-full max-w-3xl flex items-center justify-between px-6 py-4 rounded-xl bg-surface border border-outline-variant/30 shadow-xs mb-8">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                <span
-                  className={`w-2 h-2 rounded-full ${
-                    isMonochrome ? 'bg-white' : 'bg-emerald-500'
-                  }`}
-                />
+                <span className="w-2 h-2 rounded-full bg-status-success" />
                 <span className="text-xs font-semibold text-text-primary">Pipeline Daemon</span>
               </div>
               <span className="text-xs font-mono text-text-secondary">SSL Cert Verified</span>

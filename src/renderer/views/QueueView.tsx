@@ -1,7 +1,6 @@
 // src/renderer/views/QueueView.tsx
 import { useState, memo } from 'react';
 import { useDownloadStore } from '@/renderer/stores/downloadStore';
-import { useThemeStore } from '@/renderer/stores/themeStore';
 import DownloadCard from '@/renderer/components/DownloadCard';
 
 interface SectionProps {
@@ -48,7 +47,7 @@ const QueueSection = memo(
               <div key={d.id} className="space-y-1">
                 <DownloadCard download={d} />
                 {d.errorMessage && d.status === 'error' && (
-                  <div className="p-3 rounded-b-xl text-xs font-mono text-rose-500 bg-rose-500/5 border border-t-0 border-rose-500/20">
+                  <div className="p-3 rounded-b-xl text-xs font-mono text-status-error bg-status-error/5 border border-t-0 border-status-error/20">
                     {d.errorMessage}
                   </div>
                 )}
@@ -62,8 +61,6 @@ const QueueSection = memo(
 );
 
 export default function QueueView() {
-  const theme = useThemeStore((s) => s.theme);
-  const isMonochrome = theme === 'monochrome';
   const downloads = useDownloadStore((s) => s.downloads);
   const clearFinishedDownloads = useDownloadStore((s) => s.clearFinishedDownloads);
   const pauseDownload = useDownloadStore((s) => s.pauseDownload);
@@ -126,12 +123,7 @@ export default function QueueView() {
               </span>
             </div>
             <div className="flex items-center gap-2 text-xs font-mono text-text-secondary">
-              <span
-                className={`material-symbols-outlined text-[16px] ${
-                  isMonochrome ? 'text-text-primary' : 'text-emerald-500'
-                }`}
-                aria-hidden="true"
-              >
+              <span className="material-symbols-outlined text-[16px] text-status-success" aria-hidden="true">
                 arrow_downward
               </span>
               <span className="font-semibold text-text-primary">

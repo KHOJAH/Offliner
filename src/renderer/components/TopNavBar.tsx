@@ -43,8 +43,6 @@ export default function TopNavBar() {
     return count;
   });
 
-  const isMonochrome = theme === 'monochrome';
-
   const handleMinimize = () => (window as any).electronAPI?.minimize();
   const handleMaximize = () => (window as any).electronAPI?.maximize();
   const handleClose = () => (window as any).electronAPI?.close();
@@ -72,23 +70,17 @@ export default function TopNavBar() {
           <button
             title="Close"
             onClick={handleClose}
-            className={`w-3 h-3 rounded-full ${
-              isMonochrome ? 'bg-[#888888]' : 'bg-[#FF5F56]'
-            } shadow-[inset_0_0_0_1px_rgba(0,0,0,0.12)] cursor-pointer hover:opacity-80 transition-opacity focus:outline-none`}
+            className="w-3 h-3 rounded-full bg-traffic-close shadow-[inset_0_0_0_1px_rgba(0,0,0,0.12)] cursor-pointer hover:opacity-80 transition-opacity focus:outline-none"
           />
           <button
             title="Minimize"
             onClick={handleMinimize}
-            className={`w-3 h-3 rounded-full ${
-              isMonochrome ? 'bg-[#AAAAAA]' : 'bg-[#FFBD2E]'
-            } shadow-[inset_0_0_0_1px_rgba(0,0,0,0.12)] cursor-pointer hover:opacity-80 transition-opacity focus:outline-none`}
+            className="w-3 h-3 rounded-full bg-traffic-min shadow-[inset_0_0_0_1px_rgba(0,0,0,0.12)] cursor-pointer hover:opacity-80 transition-opacity focus:outline-none"
           />
           <button
             title="Maximize"
             onClick={handleMaximize}
-            className={`w-3 h-3 rounded-full ${
-              isMonochrome ? 'bg-[#CCCCCC]' : 'bg-[#27C93F]'
-            } shadow-[inset_0_0_0_1px_rgba(0,0,0,0.12)] cursor-pointer hover:opacity-80 transition-opacity focus:outline-none`}
+            className="w-3 h-3 rounded-full bg-traffic-max shadow-[inset_0_0_0_1px_rgba(0,0,0,0.12)] cursor-pointer hover:opacity-80 transition-opacity focus:outline-none"
           />
           <span className="ml-3 font-semibold text-text-primary tracking-tight text-sm">
             OFFLINER
@@ -195,11 +187,7 @@ export default function TopNavBar() {
       >
         <div className="flex items-center gap-3" style={{ WebkitAppRegion: 'no-drag' } as any}>
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-container-low text-text-secondary border border-outline-variant/15">
-            <span
-              className={`w-2 h-2 rounded-full ${
-                isMonochrome ? 'bg-white' : 'bg-emerald-500'
-              } animate-pulse`}
-            />
+            <span className="w-2 h-2 rounded-full bg-status-success animate-pulse" />
             <span className="text-xs font-medium text-on-surface">Engine Ready</span>
           </div>
         </div>

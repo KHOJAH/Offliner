@@ -234,6 +234,12 @@ Thumbs.db
 *.old
 *.exe.old
 
+# Dynamic binaries downloaded for packaging
+build/yt-dlp/linux/yt-dlp
+build/yt-dlp/darwin/yt-dlp
+build/ffmpeg/linux/
+build/ffmpeg/darwin/
+
 # .superpowers (brainstorming session files)
 .superpowers/
 
