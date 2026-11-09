@@ -43,15 +43,15 @@ const StatsRow = memo(({
   const getStatusBadge = () => {
     switch (status) {
       case 'done':
-        return <span className="text-[10px] font-mono uppercase tracking-wider font-semibold text-emerald-500">Completed</span>;
+        return <span className="text-[10px] font-mono uppercase tracking-wider font-semibold text-[var(--success)]">Completed</span>;
       case 'downloading':
         return <span className="text-[10px] font-mono uppercase tracking-wider font-semibold text-[var(--accent)]">Downloading</span>;
       case 'paused':
-        return <span className="text-[10px] font-mono uppercase tracking-wider font-semibold text-amber-500">Paused</span>;
+        return <span className="text-[10px] font-mono uppercase tracking-wider font-semibold text-[var(--warning)]">Paused</span>;
       case 'queued':
         return <span className="text-[10px] font-mono uppercase tracking-wider font-semibold text-[var(--text-tertiary)]">Queued</span>;
       case 'error':
-        return <span className="text-[10px] font-mono uppercase tracking-wider font-semibold text-red-500">Failed</span>;
+        return <span className="text-[10px] font-mono uppercase tracking-wider font-semibold text-[var(--error)]">Failed</span>;
       case 'cancelled':
         return <span className="text-[10px] font-mono uppercase tracking-wider font-semibold text-[var(--text-tertiary)]">Cancelled</span>;
       default:
@@ -123,7 +123,7 @@ const ActionButtons = memo(({
             Show Folder
           </button>
           <button 
-            className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 transition-all cursor-pointer active:scale-95" 
+            className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-[var(--error)]/10 hover:bg-[var(--error)]/20 text-[var(--error)] border border-[var(--error)]/20 transition-all cursor-pointer active:scale-95" 
             onClick={() => onRemove(id)}
           >
             Delete
@@ -149,7 +149,7 @@ const ActionButtons = memo(({
       )}
       {(status === 'downloading' || status === 'paused' || status === 'queued') && (
         <button 
-          className="px-3 py-1.5 min-w-[70px] rounded-xl text-xs font-semibold bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 transition-all cursor-pointer active:scale-95" 
+          className="px-3 py-1.5 min-w-[70px] rounded-xl text-xs font-semibold bg-[var(--error)]/10 hover:bg-[var(--error)]/20 text-[var(--error)] border border-[var(--error)]/20 transition-all cursor-pointer active:scale-95" 
           onClick={() => onCancel(id)}
         >
           Cancel
@@ -282,7 +282,7 @@ const DownloadCard = memo(({ download }: DownloadCardProps) => {
           </span>
         )}
         {isError && (
-          <div className="absolute inset-0 bg-red-600/40 backdrop-blur-xs flex items-center justify-center text-white font-bold text-lg">
+          <div className="absolute inset-0 bg-[var(--error)]/40 backdrop-blur-xs flex items-center justify-center text-white font-bold text-lg">
             !
           </div>
         )}

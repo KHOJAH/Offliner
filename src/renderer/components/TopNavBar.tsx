@@ -83,6 +83,7 @@ export default function TopNavBar() {
 
   const theme = useThemeStore((s) => s.theme);
   const setTheme = useThemeStore((s) => s.setTheme);
+  const isMonochrome = theme === 'monochrome';
 
   const activeDownloadsCount = useDownloadStore((s) => {
     let count = 0;
@@ -118,17 +119,23 @@ export default function TopNavBar() {
           <button
             title="Close"
             onClick={handleClose}
-            className="w-3 h-3 rounded-full bg-[#FF5F56] shadow-[inset_0_0_0_1px_rgba(0,0,0,0.15)] cursor-pointer transition-transform hover:brightness-110 active:scale-95 focus:outline-none"
+            className={`w-3 h-3 rounded-full ${
+              isMonochrome ? 'bg-[var(--text-secondary)]' : 'bg-[#FF5F56]'
+            } shadow-[inset_0_0_0_1px_rgba(0,0,0,0.15)] cursor-pointer transition-transform hover:brightness-110 active:scale-95 focus:outline-none`}
           />
           <button
             title="Minimize"
             onClick={handleMinimize}
-            className="w-3 h-3 rounded-full bg-[#FFBD2E] shadow-[inset_0_0_0_1px_rgba(0,0,0,0.15)] cursor-pointer transition-transform hover:brightness-110 active:scale-95 focus:outline-none"
+            className={`w-3 h-3 rounded-full ${
+              isMonochrome ? 'bg-[var(--text-tertiary)]' : 'bg-[#FFBD2E]'
+            } shadow-[inset_0_0_0_1px_rgba(0,0,0,0.15)] cursor-pointer transition-transform hover:brightness-110 active:scale-95 focus:outline-none`}
           />
           <button
             title="Maximize"
             onClick={handleMaximize}
-            className="w-3 h-3 rounded-full bg-[#27C93F] shadow-[inset_0_0_0_1px_rgba(0,0,0,0.15)] cursor-pointer transition-transform hover:brightness-110 active:scale-95 focus:outline-none"
+            className={`w-3 h-3 rounded-full ${
+              isMonochrome ? 'bg-[var(--text-tertiary)]' : 'bg-[#27C93F]'
+            } shadow-[inset_0_0_0_1px_rgba(0,0,0,0.15)] cursor-pointer transition-transform hover:brightness-110 active:scale-95 focus:outline-none`}
           />
         </div>
 

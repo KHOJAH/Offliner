@@ -353,7 +353,7 @@ export default function ClipsView() {
                     <button
                       type="button"
                       onClick={() => removeClip(clip.id)}
-                      className="px-3 py-1 text-xs font-semibold rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 transition-all cursor-pointer active:scale-95"
+                      className="px-3 py-1 text-xs font-semibold rounded-lg bg-[var(--error)]/10 hover:bg-[var(--error)]/20 text-[var(--error)] border border-[var(--error)]/20 transition-all cursor-pointer active:scale-95"
                     >
                       Remove
                     </button>

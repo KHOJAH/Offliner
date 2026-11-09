@@ -135,7 +135,7 @@ export default function AudioExtractView() {
           {/* Real-time Stream Detected Ribbon */}
           <div className="glass p-3.5 rounded-2xl border border-[var(--border-hairline)] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
             <div className="flex items-center gap-2 text-[var(--text-secondary)]">
-              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              <span className="w-2 h-2 rounded-full bg-[var(--success)]" />
               <span className="font-semibold text-[var(--text-primary)]">Stream Ingest:</span>
               <span className="font-mono text-[var(--accent)]">48,000 Hz Stereo Opus / AAC Passthrough</span>
             </div>

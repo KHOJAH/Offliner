@@ -57,7 +57,7 @@ const Section = memo(({
             <div key={d.id} className="flex flex-col">
               <DownloadCard download={d} />
               {d.errorMessage && d.status === 'error' && (
-                <div className="mx-4 -mt-2 p-3 rounded-b-xl text-xs font-medium bg-red-500/10 text-red-500 border-x border-b border-red-500/20 flex items-center justify-between">
+                <div className="mx-4 -mt-2 p-3 rounded-b-xl text-xs font-medium bg-[var(--error)]/10 text-[var(--error)] border-x border-b border-[var(--error)]/20 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="font-bold">Error:</span>
                     <span>{d.errorMessage}</span>
@@ -126,7 +126,7 @@ export default function QueueView() {
       <div className="glass p-5 rounded-2xl border border-[var(--border-hairline)] shadow-sm mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-[var(--accent)] animate-pulse" />
             <span className="text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)]">
               Engine Stream // Active Session
             </span>

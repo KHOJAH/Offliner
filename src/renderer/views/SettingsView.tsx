@@ -127,6 +127,7 @@ export default function SettingsView() {
               {/* Swatch 1: Light Mode (Warm Daylight) */}
               <div
                 onClick={() => applyTheme('light')}
+                data-theme-preview="light"
                 className={`p-4 rounded-xl border cursor-pointer transition-all ${
                   currentTheme === 'light'
                     ? 'border-[var(--accent)] shadow-md ring-2 ring-[var(--accent)]/30'
@@ -135,7 +136,7 @@ export default function SettingsView() {
                 style={{ background: '#FAFAF8', color: '#1D1D1F' }}
               >
                 <div className="flex items-center justify-between mb-3">
-                  <div className="w-4 h-4 rounded-full bg-[#0071E3]" />
+                  <div className="w-4 h-4 rounded-full" style={{ backgroundColor: '#0071E3' }} />
                   <span className="text-[10px] font-mono uppercase font-bold text-[#6E6E73]">Daylight</span>
                 </div>
                 <div className="font-bold text-sm mb-0.5">Warm Daylight</div>
@@ -145,6 +146,7 @@ export default function SettingsView() {
               {/* Swatch 2: Dark Mode (Dark Obsidian) */}
               <div
                 onClick={() => applyTheme('dark')}
+                data-theme-preview="dark"
                 className={`p-4 rounded-xl border cursor-pointer transition-all ${
                   currentTheme === 'dark'
                     ? 'border-[var(--accent)] shadow-md ring-2 ring-[var(--accent)]/30'
@@ -153,7 +155,7 @@ export default function SettingsView() {
                 style={{ background: '#0D0E11', color: '#F5F5F7' }}
               >
                 <div className="flex items-center justify-between mb-3">
-                  <div className="w-4 h-4 rounded-full bg-[#2997FF]" />
+                  <div className="w-4 h-4 rounded-full" style={{ backgroundColor: '#2997FF' }} />
                   <span className="text-[10px] font-mono uppercase font-bold text-[#86868B]">Obsidian</span>
                 </div>
                 <div className="font-bold text-sm mb-0.5">Dark Obsidian</div>
@@ -163,6 +165,7 @@ export default function SettingsView() {
               {/* Swatch 3: Pure Monochrome */}
               <div
                 onClick={() => applyTheme('monochrome')}
+                data-theme-preview="monochrome"
                 className={`p-4 rounded-xl border cursor-pointer transition-all ${
                   currentTheme === 'monochrome'
                     ? 'border-white shadow-md ring-2 ring-white/30'
@@ -236,7 +239,7 @@ export default function SettingsView() {
             </div>
             <div className="flex items-center gap-3">
               {updateInfo && (
-                <span className="text-xs font-mono font-bold text-emerald-500">
+                <span className="text-xs font-mono font-bold text-[var(--success)]">
                   v{updateInfo.version} Available
                 </span>
               )}

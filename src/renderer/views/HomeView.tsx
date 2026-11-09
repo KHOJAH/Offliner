@@ -31,7 +31,7 @@ export default function HomeView() {
       <div className="w-full max-w-3xl mx-auto text-center relative z-10">
         {/* Overline Native Engine Badge */}
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--bg-surface-elevated)] border border-[var(--border-hairline)] shadow-xs mb-6">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="w-2 h-2 rounded-full bg-[var(--success)] animate-pulse" />
           <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
             Native Engine Active
           </span>
@@ -116,7 +116,7 @@ export default function HomeView() {
           </div>
 
           <div className="flex items-center gap-2 text-[11px] font-mono text-[var(--text-tertiary)]">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[var(--success)]" />
             <span>FFmpeg 7.1 Hardlinked</span>
             <span>•</span>
             <span>Opus / AV1 / H.265</span>
