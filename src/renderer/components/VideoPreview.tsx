@@ -17,27 +17,30 @@ export default function VideoPreview({ metadata }: VideoPreviewProps) {
           alt={metadata.title}
           className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
         />
-        <div className="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded-md text-xs font-mono font-bold bg-black/80 text-white backdrop-blur-xs">
-          {duration}
-        </div>
+        {duration && (
+          <div className="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded-md text-[11px] font-medium tabular-nums bg-black/70 text-white backdrop-blur-md shadow-xs">
+            {duration}
+          </div>
+        )}
       </div>
 
       {/* Metadata & Channel Info */}
       <div>
-        <h3 className="text-lg font-bold text-[var(--text-primary)] leading-snug mb-2 line-clamp-2">
+        <h3 className="text-base sm:text-lg font-semibold tracking-tight text-[var(--text-primary)] leading-snug mb-1.5 line-clamp-2">
           {metadata.title}
         </h3>
-        <div className="flex items-center gap-3 text-xs text-[var(--text-secondary)] flex-wrap">
+        <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)] flex-wrap">
           {metadata.uploader && (
-            <span className="flex items-center gap-1 font-medium text-[var(--text-primary)]">
-              <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
+            <span className="font-medium text-[var(--text-primary)]">
               {metadata.uploader}
             </span>
           )}
-          {metadata.view_count ? (
-            <span>• {formatNumber(metadata.view_count)} views</span>
+          {metadata.uploader && metadata.view_count ? (
+            <span className="text-[var(--text-tertiary)]">•</span>
           ) : null}
-          <span>• {duration}</span>
+          {metadata.view_count ? (
+            <span>{formatNumber(metadata.view_count)} views</span>
+          ) : null}
         </div>
       </div>
     </div>
@@ -45,6 +48,7 @@ export default function VideoPreview({ metadata }: VideoPreviewProps) {
 }
 
 function formatDuration(seconds: number): string {
+  if (!seconds || seconds <= 0) return '';
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
   const s = seconds % 60;

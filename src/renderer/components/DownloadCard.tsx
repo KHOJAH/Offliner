@@ -43,37 +43,65 @@ const StatsRow = memo(({
   const getStatusBadge = () => {
     switch (status) {
       case 'done':
-        return <span className="text-[10px] font-mono uppercase tracking-wider font-semibold text-[var(--success)]">Completed</span>;
+        return (
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-[var(--success)]/10 text-[var(--success)]">
+            Completed
+          </span>
+        );
       case 'downloading':
-        return <span className="text-[10px] font-mono uppercase tracking-wider font-semibold text-[var(--accent)]">Downloading</span>;
+        return (
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-[var(--accent)]/10 text-[var(--accent)]">
+            Downloading
+          </span>
+        );
       case 'paused':
-        return <span className="text-[10px] font-mono uppercase tracking-wider font-semibold text-[var(--warning)]">Paused</span>;
+        return (
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-[var(--warning)]/10 text-[var(--warning)]">
+            Paused
+          </span>
+        );
       case 'queued':
-        return <span className="text-[10px] font-mono uppercase tracking-wider font-semibold text-[var(--text-tertiary)]">Queued</span>;
+        return (
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-[var(--text-tertiary)]/10 text-[var(--text-tertiary)]">
+            Queued
+          </span>
+        );
       case 'error':
-        return <span className="text-[10px] font-mono uppercase tracking-wider font-semibold text-[var(--error)]">Failed</span>;
+        return (
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-[var(--error)]/10 text-[var(--error)]">
+            Failed
+          </span>
+        );
       case 'cancelled':
-        return <span className="text-[10px] font-mono uppercase tracking-wider font-semibold text-[var(--text-tertiary)]">Cancelled</span>;
+        return (
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-[var(--text-tertiary)]/10 text-[var(--text-tertiary)]">
+            Cancelled
+          </span>
+        );
       default:
-        return <span className="text-[10px] font-mono uppercase tracking-wider font-semibold text-[var(--text-tertiary)]">{status}</span>;
+        return (
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-[var(--text-tertiary)]/10 text-[var(--text-tertiary)]">
+            {status}
+          </span>
+        );
     }
   };
 
   return (
-    <div className="flex items-center justify-between mt-2 text-xs text-[var(--text-secondary)] font-mono">
-      <div className="flex items-center gap-3">
-        <span className="text-[var(--accent)] font-semibold tabular-nums">{progress.toFixed(1)}%</span>
+    <div className="flex items-center justify-between mt-2.5 text-xs text-[var(--text-secondary)]">
+      <div className="flex items-center gap-2.5 flex-wrap">
+        <span className="text-[var(--accent)] font-semibold font-mono tabular-nums">{progress.toFixed(1)}%</span>
         {isActive && (
           <>
-            <span className="tabular-nums">{speed || '0 KB/s'}</span>
-            {eta && <span className="tabular-nums">ETA {eta}</span>}
+            <span className="font-mono tabular-nums">{speed || '0 KB/s'}</span>
+            {eta && <span className="font-mono tabular-nums">ETA {eta}</span>}
           </>
         )}
         {!isCompleted && totalBytes ? (
-          <span className="tabular-nums">{formatSize(downloadedBytes)} / {formatSize(totalBytes)}</span>
+          <span className="font-mono tabular-nums">{formatSize(downloadedBytes)} / {formatSize(totalBytes)}</span>
         ) : null}
         {isCompleted && totalBytes ? (
-          <span className="tabular-nums">{formatSize(totalBytes)}</span>
+          <span className="font-mono tabular-nums">{formatSize(totalBytes)}</span>
         ) : null}
       </div>
       
@@ -111,19 +139,19 @@ const ActionButtons = memo(({
       {isCompleted && (
         <>
           <button 
-            className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface-hover)] text-[var(--text-primary)] border border-[var(--border-hairline)] transition-all cursor-pointer active:scale-95" 
+            className="px-3.5 py-1.5 rounded-xl text-xs font-medium bg-[var(--accent)] hover:opacity-90 text-[var(--accent-text)] transition-all cursor-pointer active:scale-95 shadow-xs" 
             onClick={onOpen}
           >
             Open
           </button>
           <button 
-            className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface-hover)] text-[var(--text-primary)] border border-[var(--border-hairline)] transition-all cursor-pointer active:scale-95" 
+            className="px-3 py-1.5 rounded-xl text-xs font-medium bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface-hover)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-hairline)] transition-all cursor-pointer active:scale-95" 
             onClick={onShow}
           >
-            Show Folder
+            Show in Folder
           </button>
           <button 
-            className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-[var(--error)]/10 hover:bg-[var(--error)]/20 text-[var(--error)] border border-[var(--error)]/20 transition-all cursor-pointer active:scale-95" 
+            className="px-3 py-1.5 rounded-xl text-xs font-medium text-[var(--text-tertiary)] hover:text-[var(--error)] hover:bg-[var(--error)]/10 border border-transparent hover:border-[var(--error)]/20 transition-all cursor-pointer active:scale-95" 
             onClick={() => onRemove(id)}
           >
             Delete
@@ -133,7 +161,7 @@ const ActionButtons = memo(({
       
       {status === 'downloading' && (
         <button 
-          className="px-3 py-1.5 min-w-[70px] rounded-xl text-xs font-semibold bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface-hover)] text-[var(--text-primary)] border border-[var(--border-hairline)] transition-all cursor-pointer active:scale-95" 
+          className="px-3 py-1.5 min-w-[64px] rounded-xl text-xs font-medium bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface-hover)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-hairline)] transition-all cursor-pointer active:scale-95" 
           onClick={() => onPause(id)}
         >
           Pause
@@ -141,7 +169,7 @@ const ActionButtons = memo(({
       )}
       {status === 'paused' && (
         <button 
-          className="px-3 py-1.5 min-w-[70px] rounded-xl text-xs font-semibold bg-[var(--accent)] hover:brightness-105 text-[var(--accent-text)] transition-all cursor-pointer active:scale-95 shadow-sm" 
+          className="px-3 py-1.5 min-w-[64px] rounded-xl text-xs font-medium bg-[var(--accent)] hover:opacity-90 text-[var(--accent-text)] transition-all cursor-pointer active:scale-95 shadow-xs" 
           onClick={() => onResume(id)}
         >
           Resume
@@ -149,7 +177,7 @@ const ActionButtons = memo(({
       )}
       {(status === 'downloading' || status === 'paused' || status === 'queued') && (
         <button 
-          className="px-3 py-1.5 min-w-[70px] rounded-xl text-xs font-semibold bg-[var(--error)]/10 hover:bg-[var(--error)]/20 text-[var(--error)] border border-[var(--error)]/20 transition-all cursor-pointer active:scale-95" 
+          className="px-3 py-1.5 min-w-[64px] rounded-xl text-xs font-medium text-[var(--text-tertiary)] hover:text-[var(--error)] hover:bg-[var(--error)]/10 border border-transparent hover:border-[var(--error)]/20 transition-all cursor-pointer active:scale-95" 
           onClick={() => onCancel(id)}
         >
           Cancel
@@ -157,7 +185,7 @@ const ActionButtons = memo(({
       )}
       {(status === 'cancelled' || status === 'error') && (
         <button 
-          className="px-3 py-1.5 min-w-[70px] rounded-xl text-xs font-semibold bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface-hover)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-hairline)] transition-all cursor-pointer active:scale-95" 
+          className="px-3 py-1.5 min-w-[64px] rounded-xl text-xs font-medium bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface-hover)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-hairline)] transition-all cursor-pointer active:scale-95" 
           onClick={() => onRemove(id)}
         >
           Remove
@@ -268,7 +296,7 @@ const DownloadCard = memo(({ download }: DownloadCardProps) => {
   const formatTag = download.config?.audioFormat?.toUpperCase() || download.config?.format || (download.config?.clips?.length ? 'CLIP' : undefined);
 
   return (
-    <div className="glass flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-2xl border border-[var(--border-hairline)] shadow-sm hover:shadow-md transition-all">
+    <div className="glass flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-2xl border border-[var(--border-hairline)] shadow-xs hover:border-[var(--border-subtle)] transition-all duration-200">
       {/* Thumbnail with overlay badges */}
       <div className="relative w-28 h-16 rounded-xl overflow-hidden shrink-0 bg-[var(--bg-surface-elevated)] border border-[var(--border-hairline)]">
         <img
@@ -277,13 +305,15 @@ const DownloadCard = memo(({ download }: DownloadCardProps) => {
           className="w-full h-full object-cover"
         />
         {formatTag && (
-          <span className="absolute bottom-1 right-1 px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-black/75 text-white backdrop-blur-xs">
+          <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded text-[10px] font-medium tracking-wide bg-black/70 text-white backdrop-blur-sm shadow-xs">
             {formatTag}
           </span>
         )}
         {isError && (
-          <div className="absolute inset-0 bg-[var(--error)]/40 backdrop-blur-xs flex items-center justify-center text-white font-bold text-lg">
-            !
+          <div className="absolute inset-0 bg-[var(--error)]/20 backdrop-blur-xs flex items-center justify-center text-[var(--error)]">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
           </div>
         )}
       </div>
@@ -294,11 +324,6 @@ const DownloadCard = memo(({ download }: DownloadCardProps) => {
           <div className="text-sm font-semibold text-[var(--text-primary)] truncate">
             {download.title}
           </div>
-          {formatTag && (
-            <span className="px-1.5 py-0.2 rounded text-[10px] font-mono font-medium uppercase bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-hairline)] shrink-0">
-              {formatTag}
-            </span>
-          )}
         </div>
         
         {/* Smooth real-time Progress Bar */}

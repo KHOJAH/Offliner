@@ -84,7 +84,7 @@ export default function TopNavBar() {
             OFFLINER
           </span>
           <span className="ml-auto text-[11px] font-mono px-1.5 py-0.5 rounded bg-surface text-text-secondary border border-outline-variant/20 shadow-xs">
-            v2.4
+            v1.1.1
           </span>
         </div>
 
@@ -151,22 +151,10 @@ export default function TopNavBar() {
           })}
         </nav>
 
-        {/* Sidebar Footer: Bandwidth Speed */}
-        <div className="px-4 pt-4 mt-auto" style={{ WebkitAppRegion: 'no-drag' } as any}>
-          <div className="bg-surface rounded-xl p-3 shadow-[0_2px_10px_rgba(0,0,0,0.03)] border border-outline-variant/15">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[11px] text-text-secondary font-medium">Download Speed</span>
-              <span className="text-[11px] font-mono text-text-primary font-medium">
-                {activeCount > 0 ? `${(activeCount * 14.2).toFixed(1)} MB/s` : '0.0 MB/s'}
-              </span>
-            </div>
-            <div className="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
-              <div
-                className={`bg-primary h-full rounded-full transition-all duration-500 ${
-                  activeCount > 0 ? 'w-3/4 animate-pulse' : 'w-full'
-                }`}
-              />
-            </div>
+        {/* Clean Sidebar Footer Spacing */}
+        <div className="px-5 pt-4 mt-auto" style={{ WebkitAppRegion: 'no-drag' } as any}>
+          <div className="text-[11px] text-text-tertiary font-mono tracking-tight text-center opacity-60">
+            Offliner Desktop
           </div>
         </div>
       </aside>
@@ -228,10 +216,10 @@ export default function TopNavBar() {
           </div>
 
           {/* Queued Items Indicator Pill */}
-          <div className="flex items-center gap-2 pl-2">
+          <div className="flex items-center pl-2">
             <button
               onClick={() => navigate('/queue')}
-              className="flex items-center gap-2 bg-surface-container-low px-3 py-1.5 rounded-lg border border-outline-variant/15 hover:bg-surface-container transition-colors cursor-pointer"
+              className="flex items-center gap-2 bg-surface-container-low hover:bg-surface-container px-3 py-1.5 rounded-lg border border-outline-variant/15 transition-all duration-150 active:scale-[0.98] cursor-pointer"
               title="Open Queue"
               type="button"
             >
@@ -240,9 +228,6 @@ export default function TopNavBar() {
                 {queueTotal} queued
               </span>
             </button>
-            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-on-primary shadow-xs">
-              <span className="material-symbols-outlined text-[18px]">person</span>
-            </div>
           </div>
         </div>
       </header>

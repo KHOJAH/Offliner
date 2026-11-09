@@ -9,14 +9,14 @@ import { useSettingsStore } from '@/renderer/stores/settingsStore';
 import type { VideoMetadata } from '@/types';
 
 const videoPresets = [
-  { id: '1080', label: '1080p MP4 (H.264)', ext: 'mp4', sub: 'Standard Full HD' },
-  { id: '2160', label: '4K UHD ProRes', ext: 'mkv', sub: 'Highest Studio Master' },
-  { id: '720', label: '720p MP4 Compact', ext: 'mp4', sub: 'Faster Download' },
+  { id: '1080', label: '1080p Full HD', ext: 'mp4', sub: 'Standard Quality' },
+  { id: '2160', label: '4K Ultra HD', ext: 'mkv', sub: 'Best Quality' },
+  { id: '720', label: '720p HD', ext: 'mp4', sub: 'Fast Download' },
 ];
 
 const audioPresets = [
-  { id: 'mp3', label: 'MP3 320k (CBR)', sub: 'Universal Compatibility' },
-  { id: 'flac', label: 'FLAC Lossless', sub: 'Bit-Perfect Studio' },
+  { id: 'mp3', label: 'MP3', sub: 'Universal Compatibility' },
+  { id: 'flac', label: 'FLAC Lossless', sub: 'Original Quality' },
 ];
 
 export default function PlaylistView() {
@@ -127,8 +127,8 @@ export default function PlaylistView() {
 
     addToast({
       type: 'success',
-      title: 'Batch Enqueued',
-      message: `Enqueued ${toDownload.length} items from playlist.`,
+      title: 'Downloads Added',
+      message: `Added ${toDownload.length} ${toDownload.length === 1 ? 'item' : 'items'} to your download queue.`,
     });
   };
 
@@ -141,23 +141,41 @@ export default function PlaylistView() {
 
   return (
     <div className="flex flex-col w-full">
-      <div className="w-full max-w-7xl mx-auto px-6 lg:px-10 py-8 space-y-6">
+      <div className="w-full max-w-6xl mx-auto px-6 lg:px-8 py-8 space-y-6">
         {/* Top URL Input Strip */}
-        <div className="bg-surface border border-outline-variant/30 rounded-xl p-3 shadow-xs flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center shrink-0 text-primary">
-              <span className="material-symbols-outlined text-[18px]">queue_music</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <URLInput
-                onURL={handleURL}
-                loading={loading}
-                placeholder="Paste YouTube playlist URL here..."
-                initialValue={metadata?.url || (location.pathname === '/playlist' ? location.state?.url : undefined)}
-              />
-            </div>
-          </div>
+        <div className="w-full max-w-3xl mx-auto">
+          <URLInput
+            onURL={handleURL}
+            loading={loading}
+            placeholder="Paste YouTube playlist URL here..."
+            initialValue={metadata?.url || (location.pathname === '/playlist' ? location.state?.url : undefined)}
+          />
         </div>
+
+        {/* Empty State when !metadata */}
+        {!metadata && (
+          <div className="flex flex-col items-center justify-center py-16 text-center animate-in fade-in duration-300">
+            <svg
+              className="w-10 h-10 text-[var(--text-tertiary)] mb-3"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z"
+              />
+            </svg>
+            <h3 className="text-sm font-medium text-[var(--text-secondary)]">
+              No playlist loaded
+            </h3>
+            <p className="text-xs text-[var(--text-tertiary)] max-w-sm text-center mt-1">
+              Paste a YouTube playlist link above to preview and download all tracks.
+            </p>
+          </div>
+        )}
 
         {metadata && (
           <div className="space-y-6 animate-in fade-in duration-300">
@@ -192,7 +210,7 @@ export default function PlaylistView() {
                   <span className="material-symbols-outlined text-[20px]">folder</span>
                 </div>
                 <div>
-                  <div className="text-[10px] uppercase font-semibold text-text-secondary">Destination</div>
+                  <div className="text-[10px] uppercase font-semibold text-text-secondary">Save to</div>
                   <div className="text-xs font-mono font-medium text-text-primary truncate max-w-[180px]">
                     {downloadPath || 'Default Storage'}
                   </div>

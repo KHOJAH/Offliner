@@ -109,32 +109,50 @@ export default function AudioExtractView() {
 
   return (
     <div className="flex flex-col w-full">
-      <div className="px-8 py-8 max-w-6xl mx-auto w-full space-y-8">
+      <div className="px-6 lg:px-8 py-8 max-w-6xl mx-auto w-full space-y-6">
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-text-primary">
-            Audio Studio
+            Audio
           </h1>
           <p className="text-sm text-text-secondary mt-1">
-            Extract high-fidelity audio in popular formats.
+            Extract audio in high-quality formats.
           </p>
         </div>
 
-        {/* Top URL Input Strip */}
-        <div className="bg-surface border border-outline-variant/30 rounded-xl p-3 shadow-xs flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center shrink-0 text-primary">
-              <span className="material-symbols-outlined text-[18px]">link</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <URLInput
-                onURL={handleURL}
-                loading={loading}
-                initialValue={metadata?.url || (location.pathname === '/audio' ? location.state?.url : undefined)}
-              />
-            </div>
-          </div>
+        {/* URL Input: Clean Single Glass Pill */}
+        <div className="w-full max-w-3xl mx-auto">
+          <URLInput
+            onURL={handleURL}
+            loading={loading}
+            initialValue={metadata?.url || (location.pathname === '/audio' ? location.state?.url : undefined)}
+          />
         </div>
+
+        {/* Empty State when !metadata */}
+        {!metadata && (
+          <div className="flex flex-col items-center justify-center py-16 text-center animate-in fade-in duration-300">
+            <svg
+              className="w-10 h-10 text-[var(--text-tertiary)] mb-3"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+              />
+            </svg>
+            <h3 className="text-sm font-medium text-[var(--text-secondary)]">
+              Ready to extract audio
+            </h3>
+            <p className="text-xs text-[var(--text-tertiary)] max-w-sm text-center mt-1">
+              Paste a link above to extract audio in MP3, M4A, FLAC, and more.
+            </p>
+          </div>
+        )}
 
         {metadata && (
           <div className="space-y-6 animate-in fade-in duration-300">
@@ -190,7 +208,7 @@ export default function AudioExtractView() {
                   <div className="flex items-center justify-between">
                     <div>
                       <h4 className="font-semibold text-sm text-text-primary">Audio Quality</h4>
-                      <p className="text-[11px] text-text-secondary">Adjust compression and fidelity level</p>
+                      <p className="text-[11px] text-text-secondary">Higher quality produces clearer sound and larger files</p>
                     </div>
                     <span className="text-xs font-mono font-bold text-primary">
                       {quality === 0 ? 'Best (320 kbps)' : `Level ${quality} (~${320 - quality * 20} kbps)`}
@@ -224,7 +242,7 @@ export default function AudioExtractView() {
                       }`}
                     >
                       <div>
-                        <div className="font-medium text-text-primary">Cover Art</div>
+                        <div className="font-medium text-text-primary">Album Artwork</div>
                         <div className="text-[10px] text-text-secondary">Embed video thumbnail</div>
                       </div>
                       <span className="material-symbols-outlined text-[18px]">
@@ -239,7 +257,7 @@ export default function AudioExtractView() {
                       }`}
                     >
                       <div>
-                        <div className="font-medium text-text-primary">Track Tags</div>
+                        <div className="font-medium text-text-primary">Track Info</div>
                         <div className="text-[10px] text-text-secondary">Artist, track & year</div>
                       </div>
                       <span className="material-symbols-outlined text-[18px]">
@@ -254,8 +272,8 @@ export default function AudioExtractView() {
                       }`}
                     >
                       <div>
-                        <div className="font-medium text-text-primary">Normalize Audio</div>
-                        <div className="text-[10px] text-text-secondary">Standardize volume</div>
+                        <div className="font-medium text-text-primary">Even Volume</div>
+                        <div className="text-[10px] text-text-secondary">Equalize track volume</div>
                       </div>
                       <span className="material-symbols-outlined text-[18px]">
                         {normalizeLufs ? 'check_circle' : 'radio_button_unchecked'}

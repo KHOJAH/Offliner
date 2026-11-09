@@ -43,7 +43,7 @@ export default function SettingsView() {
 
   return (
     <div className="flex flex-col w-full">
-      <div className="max-w-5xl mx-auto w-full px-8 py-10 space-y-8">
+      <div className="max-w-4xl mx-auto w-full px-8 py-10 space-y-8">
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-2 border-b border-outline-variant/15">
           <div className="space-y-1">
@@ -69,7 +69,7 @@ export default function SettingsView() {
             </div>
             <div>
               <h2 className="font-bold text-base text-text-primary">General & Storage</h2>
-              <p className="text-xs text-text-secondary">Primary media destination and parallel workers</p>
+              <p className="text-xs text-text-secondary">Download location and simultaneous download limits</p>
             </div>
           </div>
 
@@ -108,11 +108,11 @@ export default function SettingsView() {
                     Concurrent Downloads: {settings.concurrency}
                   </label>
                   <span className="text-[11px] text-text-secondary">
-                    Throttles parallel TCP socket allocations to prevent bandwidth starvation (Max: 8)
+                    Number of simultaneous downloads allowed at the same time (1 to 8)
                   </span>
                 </div>
                 <span className="text-xs font-mono font-bold text-primary px-2.5 py-1 rounded-md bg-primary/10">
-                  {settings.concurrency} workers
+                  {settings.concurrency}
                 </span>
               </div>
               <input
@@ -126,9 +126,9 @@ export default function SettingsView() {
                 className="w-full h-2 bg-surface-container rounded-lg appearance-none cursor-pointer accent-primary"
               />
               <div className="flex justify-between text-[10px] font-mono text-text-secondary mt-1">
-                <span>1 Worker</span>
-                <span>4 (Balanced)</span>
-                <span>8 (Aggressive)</span>
+                <span>1</span>
+                <span>4 (Recommended)</span>
+                <span>8 (Maximum)</span>
               </div>
             </div>
           </div>
@@ -142,7 +142,7 @@ export default function SettingsView() {
             </div>
             <div>
               <h2 className="font-bold text-base text-text-primary">Appearance & Themes</h2>
-              <p className="text-xs text-text-secondary">Interface luminance, contrast levels, and studio surface styling</p>
+              <p className="text-xs text-text-secondary">Choose your preferred visual theme and contrast level</p>
             </div>
           </div>
 
@@ -173,7 +173,7 @@ export default function SettingsView() {
                 )}
               </div>
               <div className="font-bold text-sm text-text-primary mb-0.5">Light</div>
-              <div className="text-xs text-text-secondary mb-3">Warm Daylight • #FAFAF8</div>
+              <div className="text-xs text-text-secondary mb-3">Clean daylight palette</div>
               <div className="h-6 rounded-md bg-swatch-light-bg border border-black/10 flex items-center px-2">
                 <div className="w-2.5 h-2.5 rounded-full bg-swatch-light-dot" />
               </div>
@@ -205,7 +205,7 @@ export default function SettingsView() {
                 )}
               </div>
               <div className="font-bold text-sm text-text-primary mb-0.5">Dark</div>
-              <div className="text-xs text-text-secondary mb-3">Dark Obsidian • #0D0E11</div>
+              <div className="text-xs text-text-secondary mb-3">Subtle night palette</div>
               <div className="h-6 rounded-md bg-swatch-dark-bg border border-white/10 flex items-center px-2">
                 <div className="w-2.5 h-2.5 rounded-full bg-swatch-dark-dot" />
               </div>
@@ -232,7 +232,7 @@ export default function SettingsView() {
                 )}
               </div>
               <div className="font-bold text-sm text-text-primary mb-0.5">Pure Monochrome</div>
-              <div className="text-xs text-text-secondary mb-3">Zero Saturation • #000000</div>
+              <div className="text-xs text-text-secondary mb-3">Crisp grayscale contrast</div>
               <div className="h-6 rounded-md bg-swatch-mono-bg border border-white/20 flex items-center px-2">
                 <div className="w-2.5 h-2.5 rounded-full bg-swatch-mono-dot" />
               </div>

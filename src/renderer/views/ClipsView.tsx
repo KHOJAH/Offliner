@@ -158,7 +158,7 @@ export default function ClipsView() {
 
   return (
     <div className="flex flex-col w-full">
-      <div className="px-8 py-8 max-w-7xl mx-auto w-full space-y-8">
+      <div className="w-full max-w-6xl mx-auto px-6 lg:px-8 py-8 space-y-8">
         {/* Top Header */}
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-text-primary">
@@ -170,20 +170,38 @@ export default function ClipsView() {
         </div>
 
         {/* URL Input Strip */}
-        <div className="bg-surface border border-outline-variant/30 rounded-xl p-3 shadow-xs flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center shrink-0 text-primary">
-              <span className="material-symbols-outlined text-[18px]">link</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <URLInput
-                onURL={handleURL}
-                loading={loading}
-                initialValue={metadata?.url || (location.pathname === '/clips' ? location.state?.url : undefined)}
-              />
-            </div>
-          </div>
+        <div className="w-full max-w-3xl mx-auto">
+          <URLInput
+            onURL={handleURL}
+            loading={loading}
+            initialValue={metadata?.url || (location.pathname === '/clips' ? location.state?.url : undefined)}
+          />
         </div>
+
+        {/* Empty State when !metadata */}
+        {!metadata && (
+          <div className="flex flex-col items-center justify-center py-16 text-center animate-in fade-in duration-300">
+            <svg
+              className="w-10 h-10 text-[var(--text-tertiary)] mb-3"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M7.848 8.25l1.536.887M7.848 8.25a3 3 0 1 1-5.196-3 3 3 0 0 1 5.196 3Zm1.536.887a2.165 2.165 0 0 1 1.083 1.877v.03a2.165 2.165 0 0 1-1.083 1.877l-1.536.887m0 0a3 3 0 1 1-5.196 3 3 3 0 0 1 5.196-3Zm1.536-.887 6.364-3.675m0 0a3 3 0 1 1 5.196 3 3 3 0 0 1-5.196-3Zm-6.364 3.675 6.364 3.675m0 0a3 3 0 1 1-5.196 3 3 3 0 0 1 5.196-3Z"
+              />
+            </svg>
+            <h3 className="text-sm font-medium text-[var(--text-secondary)]">
+              Ready to create clips
+            </h3>
+            <p className="text-xs text-[var(--text-tertiary)] max-w-sm text-center mt-1">
+              Paste a video link above to select and extract clip segments.
+            </p>
+          </div>
+        )}
 
         {metadata && (
           <div className="space-y-6 animate-in fade-in duration-300">
@@ -209,7 +227,7 @@ export default function ClipsView() {
                 <div className="flex items-center gap-2">
                   <span className="material-symbols-outlined text-primary text-[20px]" aria-hidden="true">timer</span>
                   <span className="text-xs font-mono text-text-secondary">
-                    Playhead: <strong className="text-text-primary">{(start).toFixed(2)}s</strong> / {(metadata.duration).toFixed(2)}s
+                    Selection: <strong className="text-text-primary">{(start).toFixed(1)}s</strong> – <strong className="text-text-primary">{(end).toFixed(1)}s</strong>
                   </span>
                 </div>
                 <div className="flex items-center gap-3 text-xs font-mono text-text-secondary">
@@ -229,9 +247,9 @@ export default function ClipsView() {
               {/* Numerical Inputs with Micro-Nudge Controls */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
                 <div className="bg-surface-container-low p-4 rounded-xl border border-outline-variant/15 space-y-2">
-                  <div className="flex items-center justify-between text-xs font-semibold text-text-secondary uppercase tracking-wider">
-                    <span>Clip Start (In)</span>
-                    <span className="text-[11px] font-mono text-primary">TC: {start.toFixed(2)}s</span>
+                  <div className="flex items-center justify-between text-xs font-semibold text-text-secondary tracking-wider">
+                    <span>Start</span>
+                    <span className="text-[11px] font-mono text-primary">{(start).toFixed(1)}s</span>
                   </div>
                   <TimeInput label="Start (Seconds)" value={start} maxDuration={end} onChange={setStart} />
                   <div className="flex gap-1.5 pt-1">
@@ -267,9 +285,9 @@ export default function ClipsView() {
                 </div>
 
                 <div className="bg-surface-container-low p-4 rounded-xl border border-outline-variant/15 space-y-2">
-                  <div className="flex items-center justify-between text-xs font-semibold text-text-secondary uppercase tracking-wider">
-                    <span>Clip End (Out)</span>
-                    <span className="text-[11px] font-mono text-primary">TC: {end.toFixed(2)}s</span>
+                  <div className="flex items-center justify-between text-xs font-semibold text-text-secondary tracking-wider">
+                    <span>End</span>
+                    <span className="text-[11px] font-mono text-primary">{(end).toFixed(1)}s</span>
                   </div>
                   <TimeInput label="End (Seconds)" value={end} maxDuration={metadata.duration} onChange={setEnd} />
                   <div className="flex gap-1.5 pt-1">
@@ -331,23 +349,23 @@ export default function ClipsView() {
               />
             </div>
 
-            {/* Extraction Queue / Staged Clips */}
+            {/* Extraction Queue / Selected Clips */}
             <div className="bg-surface border border-outline-variant/30 rounded-xl p-6 shadow-xs space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="font-semibold text-sm text-text-primary">Extraction Queue</h4>
+                  <h4 className="font-semibold text-sm text-text-primary">Selected Clips</h4>
                   <p className="text-xs text-text-secondary">
-                    Clips staged for download.
+                    Clips ready for download.
                   </p>
                 </div>
                 <span className="text-xs font-mono bg-surface-container px-3 py-1 rounded-full text-text-primary font-medium">
-                  {clips.length} Segments
+                  {clips.length} {clips.length === 1 ? 'Clip' : 'Clips'}
                 </span>
               </div>
 
               {clips.length === 0 ? (
                 <div className="py-8 text-center text-xs text-text-secondary border border-dashed border-outline-variant/30 rounded-xl">
-                  No clip segments staged yet. Set your in/out points and click the add button above to stage segments.
+                  No clips added yet. Set your start and end times above and click Add Clip.
                 </div>
               ) : (
                 <div className="space-y-2">

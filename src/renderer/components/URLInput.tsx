@@ -6,9 +6,10 @@ interface URLInputProps {
   loading?: boolean;
   placeholder?: string;
   initialValue?: string;
+  className?: string;
 }
 
-export default function URLInput({ onURL, loading, placeholder, initialValue }: URLInputProps) {
+export default function URLInput({ onURL, loading, placeholder, initialValue, className }: URLInputProps) {
   const [value, setValue] = useState(initialValue || '');
 
   useEffect(() => {
@@ -39,7 +40,7 @@ export default function URLInput({ onURL, loading, placeholder, initialValue }: 
     <form
       onSubmit={handleSubmit}
       aria-label="URL Input Form"
-      className="glass flex items-center gap-2 p-1.5 pl-4 rounded-2xl border border-[var(--border-hairline)] max-w-3xl w-full mx-auto shadow-md focus-within:border-[var(--accent)] focus-within:shadow-lg transition-all"
+      className={`glass flex items-center gap-2 p-1.5 pl-4 rounded-2xl border border-[var(--border-hairline)] max-w-3xl w-full mx-auto shadow-xs hover:border-[var(--border-subtle)] focus-within:border-[var(--accent)] focus-within:shadow-sm transition-all duration-200 ${className || ''}`}
     >
       {/* Leading link icon */}
       <svg
@@ -71,7 +72,7 @@ export default function URLInput({ onURL, loading, placeholder, initialValue }: 
           type="button"
           onClick={() => setValue('')}
           aria-label="Clear input"
-          className="p-1.5 rounded-full hover:bg-[var(--bg-surface-hover)] text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-all cursor-pointer shrink-0"
+          className="p-1.5 rounded-full hover:bg-[var(--bg-surface-hover)] text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-all cursor-pointer active:scale-90 shrink-0"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -97,10 +98,10 @@ export default function URLInput({ onURL, loading, placeholder, initialValue }: 
       <button
         type="submit"
         disabled={loading || !value.trim()}
-        className={`flex items-center justify-center px-6 py-2.5 rounded-xl font-bold text-xs sm:text-sm tracking-wide transition-all shadow-sm active:scale-95 shrink-0 select-none ${
+        className={`flex items-center justify-center px-6 py-2.5 rounded-xl font-semibold text-xs sm:text-sm tracking-wide transition-all shadow-xs active:scale-[0.98] shrink-0 select-none ${
           loading || !value.trim()
             ? 'opacity-60 cursor-not-allowed bg-[var(--bg-surface-elevated)] text-[var(--text-tertiary)] border border-[var(--border-hairline)]'
-            : 'bg-[var(--accent)] hover:brightness-105 text-[var(--accent-text)] cursor-pointer'
+            : 'bg-[var(--accent)] hover:opacity-90 text-[var(--accent-text)] cursor-pointer'
         }`}
       >
         {loading ? 'ANALYZING...' : 'ANALYZE'}

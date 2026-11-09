@@ -20,7 +20,7 @@ const QueueSection = memo(
     return (
       <section className="space-y-3" style={{ opacity }}>
         <div
-          className="flex items-center justify-between pb-1 border-b border-outline-variant/15 select-none cursor-pointer"
+          className="flex items-center justify-between pb-1.5 border-b border-outline-variant/15 select-none cursor-pointer"
           onClick={isCollapsible ? onToggle : undefined}
         >
           <div className="flex items-center gap-2.5">
@@ -104,7 +104,7 @@ export default function QueueView() {
 
   return (
     <div className="flex flex-col w-full">
-      <div className="w-full max-w-7xl mx-auto px-6 lg:px-10 py-8 space-y-8">
+      <div className="w-full max-w-6xl mx-auto px-6 lg:px-10 py-8 space-y-8">
         {/* Top Context & Global Action Toolbar */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2 border-b border-outline-variant/15">
           <div className="space-y-1">
@@ -127,7 +127,7 @@ export default function QueueView() {
             <button
               type="button"
               onClick={pauseAll}
-              className="px-3 py-1.5 rounded-lg bg-surface border border-outline-variant/30 hover:bg-surface-container transition-colors text-xs font-medium text-text-primary flex items-center gap-1.5 shadow-xs"
+              className="px-3.5 py-1.5 rounded-lg bg-surface border border-outline-variant/30 hover:bg-surface-container transition-colors text-xs font-medium text-text-primary flex items-center gap-1.5 shadow-xs"
             >
               <span className="material-symbols-outlined text-[16px]">pause</span>
               <span>Pause All</span>
@@ -135,7 +135,7 @@ export default function QueueView() {
             <button
               type="button"
               onClick={resumeAll}
-              className="px-3 py-1.5 rounded-lg bg-surface border border-outline-variant/30 hover:bg-surface-container transition-colors text-xs font-medium text-text-primary flex items-center gap-1.5 shadow-xs"
+              className="px-3.5 py-1.5 rounded-lg bg-surface border border-outline-variant/30 hover:bg-surface-container transition-colors text-xs font-medium text-text-primary flex items-center gap-1.5 shadow-xs"
             >
               <span className="material-symbols-outlined text-[16px]">play_arrow</span>
               <span>Resume All</span>
@@ -143,7 +143,7 @@ export default function QueueView() {
             <button
               type="button"
               onClick={clearFinishedDownloads}
-              className="px-3 py-1.5 rounded-lg bg-surface border border-outline-variant/30 hover:bg-surface-container transition-colors text-xs font-medium text-text-secondary hover:text-text-primary flex items-center gap-1.5 shadow-xs"
+              className="px-3.5 py-1.5 rounded-lg bg-surface border border-outline-variant/30 hover:bg-surface-container transition-colors text-xs font-medium text-text-secondary hover:text-text-primary flex items-center gap-1.5 shadow-xs"
             >
               <span className="material-symbols-outlined text-[16px]">clear_all</span>
               <span>Clear Finished</span>
@@ -154,8 +154,8 @@ export default function QueueView() {
         {/* Empty State */}
         {downloadList.length === 0 ? (
           <div className="py-20 text-center flex flex-col items-center justify-center space-y-3 bg-surface border border-outline-variant/30 rounded-2xl p-8">
-            <div className="w-14 h-14 rounded-2xl bg-surface-container-low flex items-center justify-center text-text-secondary">
-              <span className="material-symbols-outlined text-3xl">downloading</span>
+            <div className="w-12 h-12 rounded-2xl bg-surface-container-low flex items-center justify-center text-text-secondary">
+              <span className="material-symbols-outlined text-[28px]">downloading</span>
             </div>
             <h3 className="text-base font-bold text-text-primary">No Downloads</h3>
             <p className="text-xs text-text-secondary max-w-sm">
@@ -174,7 +174,7 @@ export default function QueueView() {
               onToggle={() => toggleSection('Active')}
             />
 
-            {/* Queued Ingestion */}
+            {/* Queued Downloads */}
             <QueueSection
               title="Queued"
               icon="hourglass_top"

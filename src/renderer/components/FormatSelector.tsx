@@ -77,7 +77,7 @@ export default function FormatSelector({ formats, selected, onSelect, mode = 'bo
                   className={isSelected ? 'btn btn-primary' : 'btn'}
                 >
                   {format.abr ? `${format.abr}kbps` : format.acodec}
-                  <span style={{ fontSize: 11, opacity: 0.7, marginLeft: 4, color: isSelected ? 'white' : 'var(--text-secondary)' }}>• {format.ext}</span>
+                  <span style={{ fontSize: 11, opacity: 0.7, marginLeft: 4, color: isSelected ? 'var(--accent-text)' : 'var(--text-secondary)' }}>• {format.ext}</span>
                 </button>
               );
             })}

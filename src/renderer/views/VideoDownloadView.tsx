@@ -152,35 +152,40 @@ export default function VideoDownloadView() {
 
   return (
     <div className="flex flex-col w-full">
-      <div className="p-8 max-w-6xl mx-auto w-full space-y-6">
-        {/* Top URL / Stream Ingestion Strip */}
-        <div className="bg-surface border border-outline-variant/30 rounded-xl p-3 shadow-xs flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center shrink-0 text-primary">
-              <span className="material-symbols-outlined text-[18px]">link</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <URLInput
-                onURL={handleURL}
-                loading={loading}
-                initialValue={metadata?.url || (location.pathname === '/video' ? location.state?.url : undefined)}
-              />
-            </div>
-          </div>
-          {metadata && (
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                onClick={() => handleURL(metadata.url)}
-                className="h-8 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors flex items-center gap-1.5 text-text-secondary hover:text-text-primary text-xs font-medium"
-                title="Re-analyze Stream"
-                type="button"
-              >
-                <span className="material-symbols-outlined text-[16px]">sync</span>
-                <span>Re-analyze</span>
-              </button>
-            </div>
-          )}
+      <div className="px-6 lg:px-8 py-8 max-w-6xl mx-auto w-full space-y-6">
+        {/* URL Input: Clean Single Glass Pill */}
+        <div className="w-full max-w-3xl mx-auto">
+          <URLInput
+            onURL={handleURL}
+            loading={loading}
+            initialValue={metadata?.url || (location.pathname === '/video' ? location.state?.url : undefined)}
+          />
         </div>
+
+        {/* Empty State when !metadata */}
+        {!metadata && (
+          <div className="flex flex-col items-center justify-center py-16 text-center animate-in fade-in duration-300">
+            <svg
+              className="w-10 h-10 text-[var(--text-tertiary)] mb-3"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z"
+              />
+            </svg>
+            <h3 className="text-sm font-medium text-[var(--text-secondary)]">
+              Ready to download
+            </h3>
+            <p className="text-xs text-[var(--text-tertiary)] max-w-sm text-center mt-1">
+              Paste a video link above to choose quality and format options.
+            </p>
+          </div>
+        )}
 
         {metadata && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start animate-in fade-in duration-300">
@@ -190,13 +195,13 @@ export default function VideoDownloadView() {
                 <VideoPreview metadata={metadata} />
               </div>
 
-              {/* Target Destination Directory Card */}
+              {/* Save Location Card */}
               <div className="bg-surface border border-outline-variant/30 rounded-xl p-3.5 shadow-xs flex items-center justify-between text-text-secondary">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <span className="material-symbols-outlined text-[18px] text-primary">folder_open</span>
                   <div className="truncate">
                     <p className="text-[10px] uppercase tracking-wider font-semibold text-text-secondary">
-                      Target Directory
+                      Save Location
                     </p>
                     <p className="text-xs font-mono text-text-primary truncate" title={downloadPath}>
                       {downloadPath || '~/Movies/Offliner/'}
@@ -231,7 +236,7 @@ export default function VideoDownloadView() {
                 {/* Container & Codec Selector */}
                 <div className="pt-2">
                   <span className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider block mb-2">
-                    Container
+                    Format
                   </span>
                   <div className="grid grid-cols-2 gap-2">
                     <button
@@ -279,13 +284,13 @@ export default function VideoDownloadView() {
                     />
                     <div className="grid grid-cols-2 gap-4">
                       <TimeInput
-                        label="In-Point (Start)"
+                        label="Start Time"
                         value={clipStart}
                         maxDuration={clipEnd}
                         onChange={setClipStart}
                       />
                       <TimeInput
-                        label="Out-Point (End)"
+                        label="End Time"
                         value={clipEnd}
                         maxDuration={metadata.duration}
                         onChange={setClipEnd}
