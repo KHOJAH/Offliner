@@ -107,29 +107,18 @@ export default function QueueView() {
       <div className="w-full max-w-7xl mx-auto px-6 lg:px-10 py-8 space-y-8">
         {/* Top Context & Global Action Toolbar */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2 border-b border-outline-variant/15">
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-mono uppercase tracking-wider text-text-secondary font-semibold">
-                Engine Stream // Local Socket
-              </span>
-              <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary animate-ping" />
-            </div>
-            <div className="flex items-baseline gap-4">
-              <h1 className="text-3xl font-bold tracking-tight text-text-primary">
-                Transfers
-              </h1>
-              <span className="text-xs font-mono text-text-secondary">
-                Session #4829-QX
-              </span>
-            </div>
+          <div className="space-y-1">
+            <h1 className="text-3xl font-bold tracking-tight text-text-primary">
+              Transfers
+            </h1>
             <div className="flex items-center gap-2 text-xs font-mono text-text-secondary">
-              <span className="material-symbols-outlined text-[16px] text-status-success" aria-hidden="true">
+              <span className="material-symbols-outlined text-[16px] text-primary" aria-hidden="true">
                 arrow_downward
               </span>
               <span className="font-semibold text-text-primary">
                 {active.length > 0 ? `${totalSpeed.toFixed(1)} MB/s` : '0.0 MB/s'}
               </span>
-              <span>• {active.length} Active Pipes</span>
+              <span>• {active.length} active</span>
             </div>
           </div>
 

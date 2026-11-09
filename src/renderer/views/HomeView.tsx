@@ -59,8 +59,7 @@ export default function HomeView() {
 
           {/* Subtitle */}
           <p className="text-base md:text-lg text-text-secondary max-w-xl mb-10 leading-relaxed font-normal">
-            Experience the fastest, most elegant way to capture your favorite content. Clean lossless
-            stream ripping directly to your workspace.
+            Fast, minimal desktop media downloader.
           </p>
 
           {/* Omnibox / Universal Input Bar */}
@@ -149,10 +148,10 @@ export default function HomeView() {
               </div>
               <h3 className="text-base font-bold text-text-primary mb-1">Video</h3>
               <p className="text-xs text-text-secondary mb-3 leading-relaxed">
-                Full HD & 4K HDR direct passthrough
+                Full HD & 4K direct download
               </p>
               <div className="flex items-center gap-1.5 text-xs text-primary font-semibold">
-                <span>Lossless MP4/MKV</span>
+                <span>MP4 & MKV</span>
                 <span className="material-symbols-outlined text-[14px]">chevron_right</span>
               </div>
             </div>
@@ -170,10 +169,10 @@ export default function HomeView() {
               </div>
               <h3 className="text-base font-bold text-text-primary mb-1">Audio</h3>
               <p className="text-xs text-text-secondary mb-3 leading-relaxed">
-                Studio Quality bit-for-bit extraction
+                High-fidelity audio extraction
               </p>
               <div className="flex items-center gap-1.5 text-xs text-primary font-semibold">
-                <span>FLAC, M4A & MP3</span>
+                <span>MP3, FLAC, M4A & more</span>
                 <span className="material-symbols-outlined text-[14px]">chevron_right</span>
               </div>
             </div>
@@ -191,10 +190,10 @@ export default function HomeView() {
               </div>
               <h3 className="text-base font-bold text-text-primary mb-1">Clips</h3>
               <p className="text-xs text-text-secondary mb-3 leading-relaxed">
-                Precise Trimming with keyframe snapping
+                Trim and export custom segments
               </p>
               <div className="flex items-center gap-1.5 text-xs text-primary font-semibold">
-                <span>Range Export</span>
+                <span>Precision Trimmer</span>
                 <span className="material-symbols-outlined text-[14px]">chevron_right</span>
               </div>
             </div>
@@ -233,39 +232,11 @@ export default function HomeView() {
             </div>
           </div>
 
-          {/* Real-Time Activity & Precision Metrics Row */}
-          <div className="w-full max-w-3xl flex items-center justify-between px-6 py-4 rounded-xl bg-surface border border-outline-variant/30 shadow-xs mb-8">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-status-success" />
-                <span className="text-xs font-semibold text-text-primary">Pipeline Daemon</span>
-              </div>
-              <span className="text-xs font-mono text-text-secondary">SSL Cert Verified</span>
-              <span className="text-xs font-mono text-text-secondary opacity-40">|</span>
-              <span className="text-xs font-mono text-text-secondary">FFmpeg 7.1 Hardlinked</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-[11px] text-text-secondary uppercase tracking-wider font-semibold">
-                Format Engine
-              </span>
-              <span className="text-xs font-mono bg-surface-container px-2 py-0.5 rounded text-text-primary font-medium">
-                Opus / AV1 / H.265
-              </span>
-            </div>
-          </div>
-
-          {/* Centered Studio Subtle Footer Bar */}
-          <div className="w-full max-w-3xl pt-2 flex items-center justify-between text-text-secondary text-xs">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-mono px-2 py-0.5 rounded bg-surface-container-low text-text-secondary font-medium border border-outline-variant/15">
-                v2.4.0 Native
-              </span>
-              <span>Universal Desktop Binary</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-              <span className="font-mono font-medium">Ready • yt-dlp 2025.02</span>
-            </div>
+          {/* Centered Minimal Footer */}
+          <div className="w-full max-w-3xl pt-2 flex items-center justify-center text-text-secondary text-xs">
+            <span className="font-mono text-[11px] text-text-secondary opacity-70">
+              Offline media ready • Fast, private & clean
+            </span>
           </div>
         </div>
       </section>

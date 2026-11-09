@@ -17,9 +17,6 @@ export default function VideoPreview({ metadata }: VideoPreviewProps) {
           alt={metadata.title}
           className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
         />
-        <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider bg-black/70 text-white backdrop-blur-xs">
-          DASH Stream
-        </div>
         <div className="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded-md text-xs font-mono font-bold bg-black/80 text-white backdrop-blur-xs">
           {duration}
         </div>

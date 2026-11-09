@@ -21,12 +21,12 @@ interface AudioCodecOption {
 }
 
 const audioCodecs: AudioCodecOption[] = [
-  { id: 'mp3', name: 'MP3', engine: 'MPEG-1 LAME 3.100', description: 'Universal CBR/VBR' },
-  { id: 'flac', name: 'FLAC', engine: 'Lossless 24-bit', badge: 'Lossless', description: 'Free Lossless Audio' },
-  { id: 'm4a', name: 'M4A', engine: 'ALAC / AAC', description: 'Apple Native CoreAudio' },
-  { id: 'wav', name: 'WAV', engine: 'PCM Linear', description: 'Uncompressed Studio' },
-  { id: 'opus', name: 'OPUS', engine: 'Direct Passthrough', description: 'Copy Lossless Stream' },
-  { id: 'aac', name: 'AAC', engine: 'FDK-AAC', description: 'Broad compatibility' },
+  { id: 'mp3', name: 'MP3', engine: 'Standard Audio', description: 'Universal compatibility' },
+  { id: 'flac', name: 'FLAC', engine: 'Lossless Audio', badge: 'Lossless', description: 'Master studio quality' },
+  { id: 'm4a', name: 'M4A', engine: 'AAC Audio', description: 'Optimized for Apple devices' },
+  { id: 'wav', name: 'WAV', engine: 'Uncompressed', description: 'Full dynamic range' },
+  { id: 'opus', name: 'OPUS', engine: 'High Efficiency', description: 'Direct audio stream' },
+  { id: 'aac', name: 'AAC', engine: 'Advanced Audio', description: 'Standard mobile & web' },
 ];
 
 export default function AudioExtractView() {
@@ -110,33 +110,14 @@ export default function AudioExtractView() {
   return (
     <div className="flex flex-col w-full">
       <div className="px-8 py-8 max-w-6xl mx-auto w-full space-y-8">
-        {/* Header Context & Quick Metric */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="text-[11px] font-mono text-text-secondary uppercase tracking-wider">
-                Module 03 // Precision Demuxer
-              </span>
-              <span className="w-1.5 h-1.5 rounded-full bg-secondary-fixed-dim" />
-              <span className="text-[11px] text-primary font-medium">DSP Core v4.9 Active</span>
-            </div>
-            <h1 className="text-3xl font-bold tracking-tight text-text-primary">
-              Audio Studio & Lossless Extraction
-            </h1>
-          </div>
-          <div className="flex items-center gap-3 bg-surface border border-outline-variant/30 px-3.5 py-2 rounded-xl shadow-xs">
-            <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-[18px] text-primary">graphic_eq</span>
-              <span className="text-xs font-mono text-text-secondary">Engine: FFmpeg (libopus/flac)</span>
-            </div>
-            <span className="w-1 h-3 bg-outline-variant/30" />
-            <div className="flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-[16px] text-status-success" aria-hidden="true">
-                speed
-              </span>
-              <span className="text-xs font-medium text-text-primary">Zero-Reencode Ready</span>
-            </div>
-          </div>
+        {/* Header */}
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-text-primary">
+            Audio Studio
+          </h1>
+          <p className="text-sm text-text-secondary mt-1">
+            Extract high-fidelity audio in popular formats.
+          </p>
         </div>
 
         {/* Top URL Input Strip */}
@@ -157,51 +138,21 @@ export default function AudioExtractView() {
 
         {metadata && (
           <div className="space-y-6 animate-in fade-in duration-300">
-            {/* Stream Detected Banner */}
-            <div className="bg-surface border border-outline-variant/30 rounded-xl p-4 shadow-xs flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className="material-symbols-outlined text-[20px] text-primary">sensors</span>
-                <div>
-                  <div className="text-xs font-semibold text-text-primary">Stream Detected: Opus 160kbps · 48,000 Hz · 2 Channels (Stereo)</div>
-                  <div className="text-[11px] text-text-secondary">Direct Muxing Supported • Target Container: WebM (Audio/DASH)</div>
-                </div>
-              </div>
-              <span className="text-[11px] font-mono bg-status-success/10 text-status-success font-semibold px-2.5 py-1 rounded-full">
-                Bit-Perfect Pass
-              </span>
-            </div>
-
             {/* Main Stage Grid: Media Card + Transcode Panel */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-              {/* Left Column (5 cols): Media Preview & Stream Specs */}
+              {/* Left Column (5 cols): Media Preview */}
               <div className="lg:col-span-5 space-y-4">
                 <div className="bg-surface border border-outline-variant/30 rounded-xl p-4 shadow-xs space-y-4">
                   <VideoPreview metadata={metadata} />
-
-                  <div className="grid grid-cols-2 gap-2 text-center pt-2">
-                    <div className="bg-surface-container-low p-2.5 rounded-lg border border-outline-variant/15">
-                      <span className="text-[10px] uppercase font-semibold text-text-secondary block">
-                        Raw Bitstream
-                      </span>
-                      <span className="text-xs font-mono font-medium text-text-primary">87.4 MB (Lossless)</span>
-                    </div>
-                    <div className="bg-surface-container-low p-2.5 rounded-lg border border-outline-variant/15">
-                      <span className="text-[10px] uppercase font-semibold text-text-secondary block">
-                        LRA / Loudness
-                      </span>
-                      <span className="text-xs font-mono font-medium text-text-primary">18.2 LU</span>
-                    </div>
-                  </div>
                 </div>
               </div>
 
-              {/* Right Column (7 cols): Format Matrix & DSP Configuration */}
+              {/* Right Column (7 cols): Format Matrix & Configuration */}
               <div className="lg:col-span-7 space-y-5">
                 {/* Codec Selection Matrix */}
                 <div className="bg-surface border border-outline-variant/30 rounded-xl p-5 shadow-xs space-y-3">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-sm text-text-primary">Audio Format & Codec</h3>
-                    <span className="text-[11px] font-mono text-text-secondary">Multi-Target DSP</span>
+                    <h3 className="font-semibold text-sm text-text-primary">Audio Format</h3>
                   </div>
 
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
@@ -238,11 +189,11 @@ export default function AudioExtractView() {
                 <div className="bg-surface border border-outline-variant/30 rounded-xl p-5 shadow-xs space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="font-semibold text-sm text-text-primary">Encoding Quality & Bitrate</h4>
-                      <p className="text-[11px] text-text-secondary">Stepped variable bitrate target profile</p>
+                      <h4 className="font-semibold text-sm text-text-primary">Audio Quality</h4>
+                      <p className="text-[11px] text-text-secondary">Adjust compression and fidelity level</p>
                     </div>
                     <span className="text-xs font-mono font-bold text-primary">
-                      {quality === 0 ? 'Studio Master (320 kbps)' : `VBR Level ${quality} (~${320 - quality * 20}k)`}
+                      {quality === 0 ? 'Best (320 kbps)' : `Level ${quality} (~${320 - quality * 20} kbps)`}
                     </span>
                   </div>
                   <input
@@ -254,16 +205,16 @@ export default function AudioExtractView() {
                     className="w-full h-1.5 bg-surface-container rounded-lg appearance-none cursor-pointer accent-primary"
                   />
                   <div className="flex justify-between text-[10px] text-text-secondary font-mono">
-                    <span>Best (0 / 320k)</span>
+                    <span>Best (320k)</span>
                     <span>High (256k)</span>
                     <span>Medium (192k)</span>
-                    <span>Smallest (9 / 128k)</span>
+                    <span>Standard (128k)</span>
                   </div>
                 </div>
 
-                {/* Metadata & Processing Pipeline */}
+                {/* Metadata & Processing Options */}
                 <div className="bg-surface border border-outline-variant/30 rounded-xl p-5 shadow-xs space-y-3">
-                  <h4 className="font-semibold text-sm text-text-primary">Metadata & Processing Pipeline</h4>
+                  <h4 className="font-semibold text-sm text-text-primary">Audio Options</h4>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                     <button
                       type="button"
@@ -273,8 +224,8 @@ export default function AudioExtractView() {
                       }`}
                     >
                       <div>
-                        <div className="font-medium text-text-primary">Embed Cover Art</div>
-                        <div className="text-[10px] text-text-secondary">Inject HD JPEG</div>
+                        <div className="font-medium text-text-primary">Cover Art</div>
+                        <div className="text-[10px] text-text-secondary">Embed video thumbnail</div>
                       </div>
                       <span className="material-symbols-outlined text-[18px]">
                         {embedArt ? 'check_circle' : 'radio_button_unchecked'}
@@ -288,7 +239,7 @@ export default function AudioExtractView() {
                       }`}
                     >
                       <div>
-                        <div className="font-medium text-text-primary">ID3v2.4 Tags</div>
+                        <div className="font-medium text-text-primary">Track Tags</div>
                         <div className="text-[10px] text-text-secondary">Artist, track & year</div>
                       </div>
                       <span className="material-symbols-outlined text-[18px]">
@@ -303,8 +254,8 @@ export default function AudioExtractView() {
                       }`}
                     >
                       <div>
-                        <div className="font-medium text-text-primary">Normalize LUFS</div>
-                        <div className="text-[10px] text-text-secondary">Target -14 LUFS</div>
+                        <div className="font-medium text-text-primary">Normalize Audio</div>
+                        <div className="text-[10px] text-text-secondary">Standardize volume</div>
                       </div>
                       <span className="material-symbols-outlined text-[18px]">
                         {normalizeLufs ? 'check_circle' : 'radio_button_unchecked'}

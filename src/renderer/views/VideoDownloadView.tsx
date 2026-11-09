@@ -166,9 +166,6 @@ export default function VideoDownloadView() {
                 initialValue={metadata?.url || (location.pathname === '/video' ? location.state?.url : undefined)}
               />
             </div>
-            <span className="hidden sm:inline-flex text-[11px] font-medium uppercase px-2 py-0.5 rounded-full bg-primary/10 text-primary shrink-0">
-              YouTube Engine
-            </span>
           </div>
           {metadata && (
             <div className="flex items-center gap-2 shrink-0">
@@ -191,28 +188,6 @@ export default function VideoDownloadView() {
             <div className="lg:col-span-5 space-y-4">
               <div className="bg-surface border border-outline-variant/30 rounded-xl p-4 shadow-xs space-y-4">
                 <VideoPreview metadata={metadata} />
-
-                {/* Stream Specs Pill Matrix */}
-                <div className="grid grid-cols-3 gap-2 pt-2 text-center">
-                  <div className="bg-surface-container-low p-2 rounded-lg border border-outline-variant/15">
-                    <p className="text-[10px] uppercase tracking-wider text-text-secondary font-semibold">
-                      Dynamic Range
-                    </p>
-                    <p className="text-xs font-mono font-medium text-text-primary mt-0.5">HDR10</p>
-                  </div>
-                  <div className="bg-surface-container-low p-2 rounded-lg border border-outline-variant/15">
-                    <p className="text-[10px] uppercase tracking-wider text-text-secondary font-semibold">
-                      Audio Sample
-                    </p>
-                    <p className="text-xs font-mono font-medium text-text-primary mt-0.5">48 kHz</p>
-                  </div>
-                  <div className="bg-surface-container-low p-2 rounded-lg border border-outline-variant/15">
-                    <p className="text-[10px] uppercase tracking-wider text-text-secondary font-semibold">
-                      Bitrate Avg
-                    </p>
-                    <p className="text-xs font-mono font-medium text-text-primary mt-0.5">18.4 Mbps</p>
-                  </div>
-                </div>
               </div>
 
               {/* Target Destination Directory Card */}
@@ -242,14 +217,9 @@ export default function VideoDownloadView() {
             <div className="lg:col-span-7 space-y-5">
               {/* Format & Quality Section */}
               <div className="bg-surface border border-outline-variant/30 rounded-xl p-5 shadow-xs space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-primary text-[18px]">tune</span>
-                    <h3 className="font-semibold text-sm text-text-primary">Format & Quality</h3>
-                  </div>
-                  <span className="text-[11px] font-mono text-text-secondary">
-                    Estimated size ~1.85 GB
-                  </span>
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-primary text-[18px]">tune</span>
+                  <h3 className="font-semibold text-sm text-text-primary">Format & Quality</h3>
                 </div>
 
                 <FormatSelector
@@ -261,7 +231,7 @@ export default function VideoDownloadView() {
                 {/* Container & Codec Selector */}
                 <div className="pt-2">
                   <span className="text-[11px] font-semibold text-text-secondary uppercase tracking-wider block mb-2">
-                    Container & Codec
+                    Container
                   </span>
                   <div className="grid grid-cols-2 gap-2">
                     <button
@@ -274,7 +244,7 @@ export default function VideoDownloadView() {
                       }`}
                     >
                       <div className="font-medium">MP4</div>
-                      <div className="text-[10px] text-text-secondary font-normal">H.264 / AAC High Compatibility</div>
+                      <div className="text-[10px] text-text-secondary font-normal">Standard compatibility</div>
                     </button>
                     <button
                       type="button"
@@ -286,7 +256,7 @@ export default function VideoDownloadView() {
                       }`}
                     >
                       <div className="font-medium">MKV</div>
-                      <div className="text-[10px] text-text-secondary font-normal">VP9 / Opus Lossless Streams</div>
+                      <div className="text-[10px] text-text-secondary font-normal">High quality & subtitles</div>
                     </button>
                   </div>
                 </div>
@@ -333,12 +303,8 @@ export default function VideoDownloadView() {
                   className="w-full py-3.5 px-6 rounded-xl bg-primary hover:bg-primary-hover text-on-primary font-semibold text-sm flex items-center justify-center gap-2.5 shadow-md active:scale-[0.99] transition-all"
                 >
                   <span className="material-symbols-outlined text-[20px]" aria-hidden="true">download</span>
-                  <span>{isClipping ? 'Download Clip' : 'Download Video (1080p60 • 120 MB)'}</span>
+                  <span>{isClipping ? 'Download Clip' : 'Download Video'}</span>
                 </button>
-                <div className="flex items-center justify-center gap-2 text-text-secondary text-[11px] mt-2.5">
-                  <span className="material-symbols-outlined text-[14px] text-primary">bolt</span>
-                  <span>Direct Pipe Acceleration • Lossless Remuxing</span>
-                </div>
               </div>
             </div>
           </div>

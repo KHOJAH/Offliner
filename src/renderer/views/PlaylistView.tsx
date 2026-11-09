@@ -173,9 +173,6 @@ export default function PlaylistView() {
                 </div>
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2">
-                    <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-primary/10 text-primary font-medium">
-                      Batch Pipeline Synced
-                    </span>
                     <span className="text-xs text-text-secondary">
                       {metadata.uploader || 'Curated Collection'}
                     </span>
@@ -184,7 +181,7 @@ export default function PlaylistView() {
                     {metadata.title}
                   </h2>
                   <p className="text-xs text-text-secondary">
-                    {metadata.entries?.length || 0} videos • Estimated ~4.2 GB Source Total
+                    {metadata.entries?.length || 0} videos
                   </p>
                 </div>
               </div>
@@ -192,14 +189,13 @@ export default function PlaylistView() {
               {/* Destination Drive Metric */}
               <div className="bg-surface-container-low border border-outline-variant/15 p-4 rounded-xl flex items-center gap-4 z-10 shrink-0">
                 <div className="w-10 h-10 rounded-lg bg-surface flex items-center justify-center text-primary shadow-xs">
-                  <span className="material-symbols-outlined text-[20px]">hard_drive</span>
+                  <span className="material-symbols-outlined text-[20px]">folder</span>
                 </div>
                 <div>
-                  <div className="text-[10px] uppercase font-semibold text-text-secondary">Destination Drive</div>
+                  <div className="text-[10px] uppercase font-semibold text-text-secondary">Destination</div>
                   <div className="text-xs font-mono font-medium text-text-primary truncate max-w-[180px]">
                     {downloadPath || 'Default Storage'}
                   </div>
-                  <div className="text-[10px] text-status-success font-medium">Available & Ready</div>
                 </div>
               </div>
             </section>

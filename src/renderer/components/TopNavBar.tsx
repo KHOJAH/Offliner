@@ -6,17 +6,16 @@ import { useDownloadStore } from '@/renderer/stores/downloadStore';
 interface NavItem {
   path: string;
   label: string;
-  title: string;
   icon: string;
   badge?: string;
 }
 
 const studioResolvers: NavItem[] = [
-  { path: '/', label: 'Home', title: 'Universal Resolver', icon: 'motion_blur' },
-  { path: '/video', label: 'Video', title: 'Single Video', icon: 'smart_display' },
-  { path: '/audio', label: 'Audio', title: 'Audio Studio', icon: 'graphic_eq' },
-  { path: '/playlist', label: 'Playlist', title: 'Playlists', icon: 'queue_music' },
-  { path: '/clips', label: 'Clips', title: 'Precision Clips', icon: 'content_cut' },
+  { path: '/', label: 'Home', icon: 'home' },
+  { path: '/video', label: 'Video', icon: 'smart_display' },
+  { path: '/audio', label: 'Audio', icon: 'graphic_eq' },
+  { path: '/playlist', label: 'Playlist', icon: 'queue_music' },
+  { path: '/clips', label: 'Clips', icon: 'content_cut' },
 ];
 
 export default function TopNavBar() {
@@ -51,11 +50,10 @@ export default function TopNavBar() {
     {
       path: '/queue',
       label: 'Queue',
-      title: 'Transfers',
       icon: 'downloading',
       badge: activeCount > 0 ? `${activeCount} Active` : undefined,
     },
-    { path: '/settings', label: 'Settings', title: 'Preferences', icon: 'tune' },
+    { path: '/settings', label: 'Settings', icon: 'tune' },
   ];
 
   return (
@@ -90,10 +88,10 @@ export default function TopNavBar() {
           </span>
         </div>
 
-        {/* Section: Studio Resolvers */}
+        {/* Section: Library */}
         <div className="px-4 mb-2" style={{ WebkitAppRegion: 'no-drag' } as any}>
           <span className="text-[11px] uppercase tracking-wider text-text-secondary font-semibold px-2">
-            Studio Resolvers
+            Library
           </span>
         </div>
 
@@ -110,22 +108,18 @@ export default function TopNavBar() {
                     : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
                 }`}
               >
-                <span className="material-symbols-outlined text-[18px] mr-2.5 text-text-secondary">
+                <span className="material-symbols-outlined text-[18px] mr-2.5 text-text-secondary" aria-hidden="true">
                   {item.icon}
                 </span>
-                <span className="flex-1 truncate">{item.title}</span>
-                {/* Screen-reader / test accessible label */}
-                <span className="text-[10px] text-text-tertiary ml-1 opacity-70 font-normal">
-                  {item.label}
-                </span>
+                <span className="flex-1 truncate">{item.label}</span>
               </button>
             );
           })}
 
-          {/* Section: Processing Queue */}
+          {/* Section: Activity */}
           <div className="pt-4 pb-2 px-2">
             <span className="text-[11px] uppercase tracking-wider text-text-secondary font-semibold">
-              Processing Queue
+              Activity
             </span>
           </div>
 
@@ -142,13 +136,10 @@ export default function TopNavBar() {
                 }`}
               >
                 <div className="flex items-center min-w-0">
-                  <span className="material-symbols-outlined text-[18px] mr-2.5 text-text-secondary">
+                  <span className="material-symbols-outlined text-[18px] mr-2.5 text-text-secondary" aria-hidden="true">
                     {item.icon}
                   </span>
-                  <span className="truncate">{item.title}</span>
-                  <span className="text-[10px] text-text-tertiary ml-1 opacity-70 font-normal">
-                    {item.label}
-                  </span>
+                  <span className="truncate">{item.label}</span>
                 </div>
                 {item.badge && (
                   <span className="text-[11px] font-mono bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium ml-2">
@@ -160,13 +151,13 @@ export default function TopNavBar() {
           })}
         </nav>
 
-        {/* Sidebar Footer: Bandwidth & Status Metrics */}
+        {/* Sidebar Footer: Bandwidth Speed */}
         <div className="px-4 pt-4 mt-auto" style={{ WebkitAppRegion: 'no-drag' } as any}>
           <div className="bg-surface rounded-xl p-3 shadow-[0_2px_10px_rgba(0,0,0,0.03)] border border-outline-variant/15">
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[11px] text-text-secondary font-medium">Bandwidth Cache</span>
+              <span className="text-[11px] text-text-secondary font-medium">Download Speed</span>
               <span className="text-[11px] font-mono text-text-primary font-medium">
-                {activeCount > 0 ? `${(activeCount * 14.2).toFixed(1)} MB/s` : 'Engine Ready'}
+                {activeCount > 0 ? `${(activeCount * 14.2).toFixed(1)} MB/s` : '0.0 MB/s'}
               </span>
             </div>
             <div className="w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
@@ -188,7 +179,7 @@ export default function TopNavBar() {
         <div className="flex items-center gap-3" style={{ WebkitAppRegion: 'no-drag' } as any}>
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-container-low text-text-secondary border border-outline-variant/15">
             <span className="w-2 h-2 rounded-full bg-status-success animate-pulse" />
-            <span className="text-xs font-medium text-on-surface">Engine Ready</span>
+            <span className="text-xs font-medium text-on-surface">Ready</span>
           </div>
         </div>
 

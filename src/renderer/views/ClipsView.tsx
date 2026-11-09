@@ -159,25 +159,14 @@ export default function ClipsView() {
   return (
     <div className="flex flex-col w-full">
       <div className="px-8 py-8 max-w-7xl mx-auto w-full space-y-8">
-        {/* Top Header / Context */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="text-[11px] font-mono text-text-secondary uppercase tracking-wider">
-                Module 05 // Timeline Cutter
-              </span>
-              <span className="w-1.5 h-1.5 rounded-full bg-secondary-fixed-dim" />
-              <span className="text-[11px] text-primary font-medium">Keyframe Accurate Trimmer</span>
-            </div>
-            <h1 className="text-3xl font-bold tracking-tight text-text-primary">
-              Precision Clips & Sub-Segment Builder
-            </h1>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-mono bg-surface-container px-3 py-1.5 rounded-lg border border-outline-variant/20 text-text-secondary">
-              Lossless Non-Destructive Split
-            </span>
-          </div>
+        {/* Top Header */}
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-text-primary">
+            Clips
+          </h1>
+          <p className="text-sm text-text-secondary mt-1">
+            Cut and export video segments with frame precision.
+          </p>
         </div>
 
         {/* URL Input Strip */}
@@ -198,7 +187,7 @@ export default function ClipsView() {
 
         {metadata && (
           <div className="space-y-6 animate-in fade-in duration-300">
-            {/* Media Metadata Banner (Stitch Style) */}
+            {/* Media Metadata Banner */}
             <div className="bg-surface border border-outline-variant/30 rounded-xl p-6 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-6">
               <div className="flex items-start sm:items-center gap-5 min-w-0 flex-1">
                 <div className="relative shrink-0 w-36 h-22 rounded-lg overflow-hidden bg-surface-container shadow-xs">
@@ -208,12 +197,6 @@ export default function ClipsView() {
                   </div>
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-primary/10 text-primary font-medium">
-                      4K Studio Master
-                    </span>
-                    <span className="text-[11px] text-text-secondary font-mono">24.00 fps • Stereo 48kHz</span>
-                  </div>
                   <h3 className="text-lg font-bold text-text-primary truncate">{metadata.title}</h3>
                   <p className="text-xs text-text-secondary mt-0.5">{metadata.uploader}</p>
                 </div>
@@ -230,13 +213,6 @@ export default function ClipsView() {
                   </span>
                 </div>
                 <div className="flex items-center gap-3 text-xs font-mono text-text-secondary">
-                  <span>
-                    Snapping:{' '}
-                    <strong className="text-status-success">
-                      ON (I-Frame)
-                    </strong>
-                  </span>
-                  <span className="w-1 h-3 bg-outline-variant/30" />
                   <span>Duration: <strong className="text-primary">{(end - start).toFixed(1)}s</strong></span>
                 </div>
               </div>
@@ -361,7 +337,7 @@ export default function ClipsView() {
                 <div>
                   <h4 className="font-semibold text-sm text-text-primary">Extraction Queue</h4>
                   <p className="text-xs text-text-secondary">
-                    Clips staged for rendering. Keyframe-accurate split without re-encoding quality loss.
+                    Clips staged for download.
                   </p>
                 </div>
                 <span className="text-xs font-mono bg-surface-container px-3 py-1 rounded-full text-text-primary font-medium">

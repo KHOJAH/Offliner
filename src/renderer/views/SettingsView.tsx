@@ -44,18 +44,14 @@ export default function SettingsView() {
   return (
     <div className="flex flex-col w-full">
       <div className="max-w-5xl mx-auto w-full px-8 py-10 space-y-8">
-        {/* Header Section with macOS Warm Ambient Contrast */}
+        {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-2 border-b border-outline-variant/15">
           <div className="space-y-1">
-            <div className="flex items-center gap-2 text-primary text-[11px] font-mono tracking-wider uppercase font-semibold">
-              <span className="material-symbols-outlined text-[16px]">tune</span>
-              <span>System Environment & Execution Matrix</span>
-            </div>
             <h1 className="text-3xl font-bold tracking-tight text-text-primary">
               Settings
             </h1>
             <p className="text-xs text-text-secondary">
-              Configure resolver pipelines, local storage sandboxes, and hardware acceleration.
+              Manage download preferences, appearance, and updates.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -244,13 +240,13 @@ export default function SettingsView() {
           </div>
         </section>
 
-        {/* Section 3: Engine Pipeline & Updates */}
+        {/* Section 3: Updates */}
         <section className="bg-surface border border-outline-variant/30 rounded-2xl shadow-xs p-6 lg:p-8 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-bold text-sm text-text-primary">Engine Pipeline & Updates</h3>
+              <h3 className="font-bold text-sm text-text-primary">Updates</h3>
               <p className="text-xs text-text-secondary">
-                yt-dlp core, FFmpeg static links, and desktop auto-updates
+                Keep Offliner and download components up to date
               </p>
             </div>
             <button
