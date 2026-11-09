@@ -11,23 +11,24 @@ export default function ProgressBar({ download, displayProgress }: ProgressBarPr
   const safeProgress = Math.min(100, Math.max(0, progress));
   
   const isDone = download.status === 'done';
-  const transition = isDone ? 'width 0.3s ease' : 'width 3s linear';
+  const transition = isDone ? 'width 0.3s cubic-bezier(0.16, 1, 0.3, 1)' : 'width 3s linear';
 
   return (
-    <div style={{
-      width: '100%',
-      height: 8,
-      background: 'rgba(255,255,255,0.1)',
-      borderRadius: 4,
-      overflow: 'hidden',
-    }}>
-      <div style={{
-        width: `${safeProgress}%`,
-        height: '100%',
-        background: `linear-gradient(90deg, #6366F1, #8B5CF6)`,
-        borderRadius: 4,
-        transition: transition,
-      }} />
+    <div
+      className="w-full h-2 rounded-full overflow-hidden border border-[var(--border-hairline)]"
+      style={{
+        background: 'var(--bg-surface-elevated)',
+      }}
+    >
+      <div
+        className="h-full rounded-full"
+        style={{
+          width: `${safeProgress}%`,
+          background: 'var(--accent)',
+          transition: transition,
+        }}
+      />
     </div>
   );
 }
+

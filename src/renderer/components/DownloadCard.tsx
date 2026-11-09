@@ -40,33 +40,45 @@ const StatsRow = memo(({
     return `${val.toFixed(1)} ${units[unit]}`;
   };
 
+  const getStatusBadge = () => {
+    switch (status) {
+      case 'done':
+        return <span className="text-[10px] font-mono uppercase tracking-wider font-semibold text-emerald-500">Completed</span>;
+      case 'downloading':
+        return <span className="text-[10px] font-mono uppercase tracking-wider font-semibold text-[var(--accent)]">Downloading</span>;
+      case 'paused':
+        return <span className="text-[10px] font-mono uppercase tracking-wider font-semibold text-amber-500">Paused</span>;
+      case 'queued':
+        return <span className="text-[10px] font-mono uppercase tracking-wider font-semibold text-[var(--text-tertiary)]">Queued</span>;
+      case 'error':
+        return <span className="text-[10px] font-mono uppercase tracking-wider font-semibold text-red-500">Failed</span>;
+      case 'cancelled':
+        return <span className="text-[10px] font-mono uppercase tracking-wider font-semibold text-[var(--text-tertiary)]">Cancelled</span>;
+      default:
+        return <span className="text-[10px] font-mono uppercase tracking-wider font-semibold text-[var(--text-tertiary)]">{status}</span>;
+    }
+  };
+
   return (
-    <div style={{ 
-      display: 'flex', 
-      justifyContent: 'space-between', 
-      marginTop: 6, 
-      fontSize: 11, 
-      color: 'var(--text-secondary)',
-      fontWeight: 500
-    }}>
-      <div style={{ display: 'flex', gap: 12 }}>
-        <span style={{ color: 'var(--accent)', fontWeight: 600 }}>{progress.toFixed(1)}%</span>
+    <div className="flex items-center justify-between mt-2 text-xs text-[var(--text-secondary)] font-mono">
+      <div className="flex items-center gap-3">
+        <span className="text-[var(--accent)] font-semibold tabular-nums">{progress.toFixed(1)}%</span>
         {isActive && (
           <>
-            <span>{speed || '0 KB/s'}</span>
-            <span>{eta ? `ETA ${eta}` : ''}</span>
+            <span className="tabular-nums">{speed || '0 KB/s'}</span>
+            {eta && <span className="tabular-nums">ETA {eta}</span>}
           </>
         )}
-        {!isCompleted && totalBytes && (
-           <span>{formatSize(downloadedBytes)} / {formatSize(totalBytes)}</span>
-        )}
-        {isCompleted && totalBytes && (
-           <span>{formatSize(totalBytes)}</span>
-        )}
+        {!isCompleted && totalBytes ? (
+          <span className="tabular-nums">{formatSize(downloadedBytes)} / {formatSize(totalBytes)}</span>
+        ) : null}
+        {isCompleted && totalBytes ? (
+          <span className="tabular-nums">{formatSize(totalBytes)}</span>
+        ) : null}
       </div>
       
-      <div style={{ textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '10px' }}>
-        {status}
+      <div>
+        {getStatusBadge()}
       </div>
     </div>
   );
@@ -95,26 +107,61 @@ const ActionButtons = memo(({
   const isCompleted = status === 'done';
   
   return (
-    <div style={{ display: 'flex', gap: 8 }}>
+    <div className="flex items-center gap-2 shrink-0">
       {isCompleted && (
         <>
-          <button className="btn" onClick={onOpen} style={{ padding: '6px 12px' }}>Open</button>
-          <button className="btn" onClick={onShow} style={{ padding: '6px 12px' }}>Show Folder</button>
-          <button className="btn btn-danger" onClick={() => onRemove(id)} style={{ padding: '6px 12px' }}>Delete</button>
+          <button 
+            className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface-hover)] text-[var(--text-primary)] border border-[var(--border-hairline)] transition-all cursor-pointer active:scale-95" 
+            onClick={onOpen}
+          >
+            Open
+          </button>
+          <button 
+            className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface-hover)] text-[var(--text-primary)] border border-[var(--border-hairline)] transition-all cursor-pointer active:scale-95" 
+            onClick={onShow}
+          >
+            Show Folder
+          </button>
+          <button 
+            className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 transition-all cursor-pointer active:scale-95" 
+            onClick={() => onRemove(id)}
+          >
+            Delete
+          </button>
         </>
       )}
       
       {status === 'downloading' && (
-        <button className="btn" onClick={() => onPause(id)} style={{ minWidth: 80, height: 32 }}>Pause</button>
+        <button 
+          className="px-3 py-1.5 min-w-[70px] rounded-xl text-xs font-semibold bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface-hover)] text-[var(--text-primary)] border border-[var(--border-hairline)] transition-all cursor-pointer active:scale-95" 
+          onClick={() => onPause(id)}
+        >
+          Pause
+        </button>
       )}
       {status === 'paused' && (
-        <button className="btn btn-primary" onClick={() => onResume(id)} style={{ minWidth: 80, height: 32 }}>Resume</button>
+        <button 
+          className="px-3 py-1.5 min-w-[70px] rounded-xl text-xs font-semibold bg-[var(--accent)] hover:brightness-105 text-[var(--accent-text)] transition-all cursor-pointer active:scale-95 shadow-sm" 
+          onClick={() => onResume(id)}
+        >
+          Resume
+        </button>
       )}
       {(status === 'downloading' || status === 'paused' || status === 'queued') && (
-        <button className="btn btn-danger" onClick={() => onCancel(id)} style={{ minWidth: 80, height: 32 }}>Cancel</button>
+        <button 
+          className="px-3 py-1.5 min-w-[70px] rounded-xl text-xs font-semibold bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 transition-all cursor-pointer active:scale-95" 
+          onClick={() => onCancel(id)}
+        >
+          Cancel
+        </button>
       )}
       {(status === 'cancelled' || status === 'error') && (
-        <button className="btn" onClick={() => onRemove(id)} style={{ minWidth: 80, height: 32 }}>Remove</button>
+        <button 
+          className="px-3 py-1.5 min-w-[70px] rounded-xl text-xs font-semibold bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface-hover)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-hairline)] transition-all cursor-pointer active:scale-95" 
+          onClick={() => onRemove(id)}
+        >
+          Remove
+        </button>
       )}
     </div>
   );
@@ -126,7 +173,7 @@ const DownloadCard = memo(({ download }: DownloadCardProps) => {
   const resumeDownload = useDownloadStore((s) => s.resumeDownload);
   const removePermanent = useDownloadStore((s) => s.removePermanent);
 
-  // Stats Display State (Updated every 3s)
+  // Stats Display State (Updated every 3s - Feature #23)
   const [displayStats, setDisplayStats] = useState({
     speed: download.speed || '',
     eta: download.eta || '',
@@ -165,7 +212,7 @@ const DownloadCard = memo(({ download }: DownloadCardProps) => {
     return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
   };
 
-  // 3s UI Update Interval
+  // 3s UI Update Interval (Feature #23 Progress Metric Smoothing)
   useEffect(() => {
     if (download.status !== 'downloading') {
       setDisplayStats({
@@ -218,53 +265,46 @@ const DownloadCard = memo(({ download }: DownloadCardProps) => {
   const isCompleted = download.status === 'done';
   const isError = download.status === 'error';
   const isActive = download.status === 'downloading' || download.status === 'paused';
+  const formatTag = download.config?.audioFormat?.toUpperCase() || download.config?.format || (download.config?.clips?.length ? 'CLIP' : undefined);
 
   return (
-    <div className="glass" style={{ 
-      padding: '16px 20px', 
-      display: 'flex', 
-      gap: 16, 
-      alignItems: 'center',
-      borderRadius: 'var(--radius-lg)',
-    }}>
-      <div style={{ position: 'relative', width: 100, height: 56, flexShrink: 0 }}>
+    <div className="glass flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-2xl border border-[var(--border-hairline)] shadow-sm hover:shadow-md transition-all">
+      {/* Thumbnail with overlay badges */}
+      <div className="relative w-28 h-16 rounded-xl overflow-hidden shrink-0 bg-[var(--bg-surface-elevated)] border border-[var(--border-hairline)]">
         <img
           src={download.thumbnail}
           alt={download.title}
-          style={{ width: '100%', height: '100%', borderRadius: 'var(--radius-sm)', objectFit: 'cover' }}
+          className="w-full h-full object-cover"
         />
+        {formatTag && (
+          <span className="absolute bottom-1 right-1 px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-black/75 text-white backdrop-blur-xs">
+            {formatTag}
+          </span>
+        )}
         {isError && (
-          <div style={{ 
-            position: 'absolute', 
-            inset: 0, 
-            background: 'rgba(255, 59, 48, 0.4)', 
-            borderRadius: 'var(--radius-sm)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'white',
-            fontSize: '20px'
-          }}>!</div>
+          <div className="absolute inset-0 bg-red-600/40 backdrop-blur-xs flex items-center justify-center text-white font-bold text-lg">
+            !
+          </div>
         )}
       </div>
 
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ 
-          fontSize: 14, 
-          fontWeight: 600, 
-          marginBottom: 6, 
-          whiteSpace: 'nowrap', 
-          overflow: 'hidden', 
-          textOverflow: 'ellipsis',
-          color: 'var(--text-primary)'
-        }}>
-          {download.title}
+      {/* Middle content: Title, Badges, Progress, Stats */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-1.5">
+          <div className="text-sm font-semibold text-[var(--text-primary)] truncate">
+            {download.title}
+          </div>
+          {formatTag && (
+            <span className="px-1.5 py-0.2 rounded text-[10px] font-mono font-medium uppercase bg-[var(--bg-surface-elevated)] text-[var(--text-secondary)] border border-[var(--border-hairline)] shrink-0">
+              {formatTag}
+            </span>
+          )}
         </div>
         
-        {/* Progress bar stays smooth with current progress */}
+        {/* Smooth real-time Progress Bar */}
         <ProgressBar download={download} />
         
-        {/* Stats Row only updates every 3s */}
+        {/* 3s Rolling Average Stats */}
         <StatsRow 
           progress={displayStats.progress}
           speed={displayStats.speed}
@@ -277,6 +317,7 @@ const DownloadCard = memo(({ download }: DownloadCardProps) => {
         />
       </div>
 
+      {/* Actions */}
       <ActionButtons 
         status={download.status}
         id={download.id}
@@ -292,3 +333,4 @@ const DownloadCard = memo(({ download }: DownloadCardProps) => {
 });
 
 export default DownloadCard;
+

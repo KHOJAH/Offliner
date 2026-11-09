@@ -9,27 +9,38 @@ export default function VideoPreview({ metadata }: VideoPreviewProps) {
   const duration = formatDuration(metadata.duration);
 
   return (
-    <div className="glass" style={{
-      display: 'flex',
-      gap: 16,
-      padding: 16,
-      alignItems: 'flex-start',
-    }}>
-      <img
-        src={metadata.thumbnail}
-        alt={metadata.title}
-        style={{
-          width: 160,
-          borderRadius: 10,
-          flexShrink: 0,
-        }}
-      />
-      <div style={{ flex: 1 }}>
-        <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8, color: 'var(--text-primary)' }}>{metadata.title}</h3>
-        <div style={{ display: 'flex', gap: 16, fontSize: 13, color: 'var(--text-secondary)' }}>
-          <span>👤 {metadata.uploader}</span>
-          <span>⏱️ {duration}</span>
-          {metadata.view_count && <span>👁️ {formatNumber(metadata.view_count)} views</span>}
+    <div className="flex flex-col gap-4">
+      {/* 16:9 Thumbnail with duration overlay */}
+      <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-[var(--bg-surface-elevated)] border border-[var(--border-hairline)] shadow-sm group">
+        <img
+          src={metadata.thumbnail}
+          alt={metadata.title}
+          className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
+        />
+        <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider bg-black/70 text-white backdrop-blur-xs">
+          DASH Stream
+        </div>
+        <div className="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded-md text-xs font-mono font-bold bg-black/80 text-white backdrop-blur-xs">
+          {duration}
+        </div>
+      </div>
+
+      {/* Metadata & Channel Info */}
+      <div>
+        <h3 className="text-lg font-bold text-[var(--text-primary)] leading-snug mb-2 line-clamp-2">
+          {metadata.title}
+        </h3>
+        <div className="flex items-center gap-3 text-xs text-[var(--text-secondary)] flex-wrap">
+          {metadata.uploader && (
+            <span className="flex items-center gap-1 font-medium text-[var(--text-primary)]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
+              {metadata.uploader}
+            </span>
+          )}
+          {metadata.view_count ? (
+            <span>• {formatNumber(metadata.view_count)} views</span>
+          ) : null}
+          <span>• {duration}</span>
         </div>
       </div>
     </div>
@@ -49,3 +60,4 @@ function formatNumber(n: number): string {
   if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
   return String(n);
 }
+
