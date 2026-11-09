@@ -10,7 +10,6 @@ import { ipcClient } from '@/renderer/ipc/client';
 import { useUIStore } from '@/renderer/stores/uiStore';
 import { useDownloadStore } from '@/renderer/stores/downloadStore';
 import { useSettingsStore } from '@/renderer/stores/settingsStore';
-import { useThemeStore } from '@/renderer/stores/themeStore';
 import type { VideoMetadata, ClipRange } from '@/types';
 
 interface ClipDef {
@@ -33,8 +32,6 @@ export default function ClipsView() {
   const addToast = useUIStore((s) => s.addToast);
   const addDownload = useDownloadStore((s) => s.addDownload);
   const downloadPath = useSettingsStore((s) => s.downloadPath);
-  const theme = useThemeStore((s) => s.theme);
-  const isMonochrome = theme === 'monochrome';
 
   const findBestVideoFormat = (formats: any[]) => {
     const videoFormats = formats.filter((f) => f.vcodec && f.vcodec !== 'none');
@@ -235,7 +232,7 @@ export default function ClipsView() {
                 <div className="flex items-center gap-3 text-xs font-mono text-text-secondary">
                   <span>
                     Snapping:{' '}
-                    <strong className={isMonochrome ? 'text-text-primary' : 'text-emerald-500'}>
+                    <strong className="text-status-success">
                       ON (I-Frame)
                     </strong>
                   </span>
@@ -397,7 +394,7 @@ export default function ClipsView() {
                       <button
                         type="button"
                         onClick={() => removeClip(clip.id)}
-                        className="p-1.5 rounded-lg text-text-secondary hover:text-rose-500 hover:bg-surface transition-colors"
+                        className="p-1.5 rounded-lg text-text-secondary hover:text-status-error hover:bg-surface transition-colors"
                         title="Remove Segment"
                       >
                         <span className="material-symbols-outlined text-[16px]" aria-hidden="true">close</span>

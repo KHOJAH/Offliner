@@ -10,7 +10,6 @@ import { ipcClient } from '@/renderer/ipc/client';
 import { useUIStore } from '@/renderer/stores/uiStore';
 import { useDownloadStore } from '@/renderer/stores/downloadStore';
 import { useSettingsStore } from '@/renderer/stores/settingsStore';
-import { useThemeStore } from '@/renderer/stores/themeStore';
 import type { VideoMetadata, ClipRange } from '@/types';
 
 interface AudioCodecOption {
@@ -47,8 +46,6 @@ export default function AudioExtractView() {
   const addToast = useUIStore((s) => s.addToast);
   const addDownload = useDownloadStore((s) => s.addDownload);
   const downloadPath = useSettingsStore((s) => s.downloadPath);
-  const theme = useThemeStore((s) => s.theme);
-  const isMonochrome = theme === 'monochrome';
 
   const handleURL = useCallback(
     async (url: string) => {
@@ -134,12 +131,7 @@ export default function AudioExtractView() {
             </div>
             <span className="w-1 h-3 bg-outline-variant/30" />
             <div className="flex items-center gap-1.5">
-              <span
-                className={`material-symbols-outlined text-[16px] ${
-                  isMonochrome ? 'text-text-primary' : 'text-emerald-500'
-                }`}
-                aria-hidden="true"
-              >
+              <span className="material-symbols-outlined text-[16px] text-status-success" aria-hidden="true">
                 speed
               </span>
               <span className="text-xs font-medium text-text-primary">Zero-Reencode Ready</span>
@@ -174,7 +166,7 @@ export default function AudioExtractView() {
                   <div className="text-[11px] text-text-secondary">Direct Muxing Supported • Target Container: WebM (Audio/DASH)</div>
                 </div>
               </div>
-              <span className="text-[11px] font-mono bg-emerald-500/10 text-emerald-500 font-semibold px-2.5 py-1 rounded-full">
+              <span className="text-[11px] font-mono bg-status-success/10 text-status-success font-semibold px-2.5 py-1 rounded-full">
                 Bit-Perfect Pass
               </span>
             </div>

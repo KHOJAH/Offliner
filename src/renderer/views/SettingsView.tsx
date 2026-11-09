@@ -9,7 +9,6 @@ export default function SettingsView() {
   const settings = useSettingsStore();
   const currentTheme = useThemeStore((s) => s.theme);
   const setTheme = useThemeStore((s) => s.setTheme);
-  const isMonochrome = currentTheme === 'monochrome';
   const addToast = useUIStore((s) => s.addToast);
   const [checkingUpdate, setCheckingUpdate] = useState(false);
   const [appVersion, setAppVersion] = useState('1.1.1');
@@ -168,9 +167,7 @@ export default function SettingsView() {
             >
               <div className="flex items-center justify-between mb-3">
                 <span
-                  className={`material-symbols-outlined text-[22px] ${
-                    isMonochrome ? 'text-text-primary' : 'text-amber-500'
-                  }`}
+                  className="material-symbols-outlined text-[22px] text-swatch-light-icon"
                   aria-hidden="true"
                 >
                   light_mode
@@ -181,16 +178,8 @@ export default function SettingsView() {
               </div>
               <div className="font-bold text-sm text-text-primary mb-0.5">Light</div>
               <div className="text-xs text-text-secondary mb-3">Warm Daylight • #FAFAF8</div>
-              <div
-                className={`h-6 rounded-md border border-black/10 flex items-center px-2 ${
-                  isMonochrome ? 'bg-[#E5E5E5]' : 'bg-[#FAFAF8]'
-                }`}
-              >
-                <div
-                  className={`w-2.5 h-2.5 rounded-full ${
-                    isMonochrome ? 'bg-[#FFFFFF]' : 'bg-[#0071E3]'
-                  }`}
-                />
+              <div className="h-6 rounded-md bg-swatch-light-bg border border-black/10 flex items-center px-2">
+                <div className="w-2.5 h-2.5 rounded-full bg-swatch-light-dot" />
               </div>
             </button>
 
@@ -210,9 +199,7 @@ export default function SettingsView() {
             >
               <div className="flex items-center justify-between mb-3">
                 <span
-                  className={`material-symbols-outlined text-[22px] ${
-                    isMonochrome ? 'text-text-primary' : 'text-blue-400'
-                  }`}
+                  className="material-symbols-outlined text-[22px] text-swatch-dark-icon"
                   aria-hidden="true"
                 >
                   dark_mode
@@ -223,16 +210,8 @@ export default function SettingsView() {
               </div>
               <div className="font-bold text-sm text-text-primary mb-0.5">Dark</div>
               <div className="text-xs text-text-secondary mb-3">Dark Obsidian • #0D0E11</div>
-              <div
-                className={`h-6 rounded-md border border-white/10 flex items-center px-2 ${
-                  isMonochrome ? 'bg-[#111111]' : 'bg-[#0D0E11]'
-                }`}
-              >
-                <div
-                  className={`w-2.5 h-2.5 rounded-full ${
-                    isMonochrome ? 'bg-[#888888]' : 'bg-[#2997FF]'
-                  }`}
-                />
+              <div className="h-6 rounded-md bg-swatch-dark-bg border border-white/10 flex items-center px-2">
+                <div className="w-2.5 h-2.5 rounded-full bg-swatch-dark-dot" />
               </div>
             </button>
 
@@ -251,15 +230,15 @@ export default function SettingsView() {
               }`}
             >
               <div className="flex items-center justify-between mb-3">
-                <span className="material-symbols-outlined text-[22px] text-white" aria-hidden="true">contrast</span>
+                <span className="material-symbols-outlined text-[22px] text-swatch-mono-icon" aria-hidden="true">contrast</span>
                 {currentTheme === 'monochrome' && (
                   <span className="material-symbols-outlined text-primary text-[18px]" aria-hidden="true">check_circle</span>
                 )}
               </div>
               <div className="font-bold text-sm text-text-primary mb-0.5">Pure Monochrome</div>
               <div className="text-xs text-text-secondary mb-3">Zero Saturation • #000000</div>
-              <div className="h-6 rounded-md bg-[#000000] border border-white/20 flex items-center px-2">
-                <div className="w-2.5 h-2.5 rounded-full bg-[#FFFFFF]" />
+              <div className="h-6 rounded-md bg-swatch-mono-bg border border-white/20 flex items-center px-2">
+                <div className="w-2.5 h-2.5 rounded-full bg-swatch-mono-dot" />
               </div>
             </button>
           </div>

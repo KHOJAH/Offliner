@@ -199,7 +199,7 @@ export default function PlaylistView() {
                   <div className="text-xs font-mono font-medium text-text-primary truncate max-w-[180px]">
                     {downloadPath || 'Default Storage'}
                   </div>
-                  <div className="text-[10px] text-emerald-500 font-medium">Available & Ready</div>
+                  <div className="text-[10px] text-status-success font-medium">Available & Ready</div>
                 </div>
               </div>
             </section>

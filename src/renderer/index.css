@@ -26,6 +26,30 @@
   --warning: #FF9500;
   --error: #FF3B30;
 
+  /* Window Traffic Lights (Apple Native Saturated) */
+  --traffic-close: #FF5F56;
+  --traffic-min: #FFBD2E;
+  --traffic-max: #27C93F;
+
+  /* Status Tokens */
+  --status-success: #34C759;
+  --status-success-bg: rgba(52, 199, 89, 0.12);
+  --status-warning: #FF9500;
+  --status-warning-bg: rgba(255, 149, 0, 0.12);
+  --status-error: #FF3B30;
+  --status-error-bg: rgba(255, 59, 48, 0.12);
+
+  /* Theme Picker Swatches */
+  --swatch-light-bg: #FAFAF8;
+  --swatch-light-dot: #0071E3;
+  --swatch-light-icon: #FF9500;
+  --swatch-dark-bg: #0D0E11;
+  --swatch-dark-dot: #2997FF;
+  --swatch-dark-icon: #0071E3;
+  --swatch-mono-bg: #000000;
+  --swatch-mono-dot: #FFFFFF;
+  --swatch-mono-icon: #FFFFFF;
+
   /* Glassmorphism */
   --glass-bg: rgba(255, 255, 255, 0.72);
   --glass-border: rgba(0, 0, 0, 0.08);
@@ -93,6 +117,30 @@
   --warning: #FF9500;
   --error: #FF3B30;
 
+  /* Window Traffic Lights (Apple Native Saturated) */
+  --traffic-close: #FF5F56;
+  --traffic-min: #FFBD2E;
+  --traffic-max: #27C93F;
+
+  /* Status Tokens */
+  --status-success: #34C759;
+  --status-success-bg: rgba(52, 199, 89, 0.12);
+  --status-warning: #FF9500;
+  --status-warning-bg: rgba(255, 149, 0, 0.12);
+  --status-error: #FF3B30;
+  --status-error-bg: rgba(255, 59, 48, 0.12);
+
+  /* Theme Picker Swatches */
+  --swatch-light-bg: #FAFAF8;
+  --swatch-light-dot: #0071E3;
+  --swatch-light-icon: #FF9500;
+  --swatch-dark-bg: #0D0E11;
+  --swatch-dark-dot: #2997FF;
+  --swatch-dark-icon: #0071E3;
+  --swatch-mono-bg: #000000;
+  --swatch-mono-dot: #FFFFFF;
+  --swatch-mono-icon: #FFFFFF;
+
   --glass-bg: rgba(255, 255, 255, 0.72);
   --glass-border: rgba(0, 0, 0, 0.08);
   --glass-blur: blur(20px);
@@ -137,6 +185,30 @@
   --success: #30D158;
   --warning: #FF9F0A;
   --error: #FF453A;
+
+  /* Window Traffic Lights (Dark Saturated) */
+  --traffic-close: #FF5F56;
+  --traffic-min: #FFBD2E;
+  --traffic-max: #27C93F;
+
+  /* Status Tokens */
+  --status-success: #30D158;
+  --status-success-bg: rgba(48, 209, 88, 0.15);
+  --status-warning: #FF9F0A;
+  --status-warning-bg: rgba(255, 159, 10, 0.15);
+  --status-error: #FF453A;
+  --status-error-bg: rgba(255, 69, 58, 0.15);
+
+  /* Theme Picker Swatches */
+  --swatch-light-bg: #FAFAF8;
+  --swatch-light-dot: #0071E3;
+  --swatch-light-icon: #FF9500;
+  --swatch-dark-bg: #0D0E11;
+  --swatch-dark-dot: #2997FF;
+  --swatch-dark-icon: #2997FF;
+  --swatch-mono-bg: #000000;
+  --swatch-mono-dot: #FFFFFF;
+  --swatch-mono-icon: #FFFFFF;
 
   --glass-bg: rgba(23, 24, 28, 0.75);
   --glass-border: rgba(255, 255, 255, 0.08);
@@ -183,6 +255,30 @@
   --warning: #CCCCCC;
   --error: #FFFFFF;
 
+  /* Window Traffic Lights (Strict Achromatic Grayscale: R=G=B, Chroma=0) */
+  --traffic-close: #666666;   /* R=102, G=102, B=102, Chroma=0 */
+  --traffic-min: #888888;     /* R=136, G=136, B=136, Chroma=0 */
+  --traffic-max: #AAAAAA;     /* R=170, G=170, B=170, Chroma=0 */
+
+  /* Status Tokens (Strict Achromatic Grayscale: R=G=B, Chroma=0) */
+  --status-success: #FFFFFF;     /* R=255, G=255, B=255, Chroma=0 */
+  --status-success-bg: rgba(255, 255, 255, 0.12);
+  --status-warning: #CCCCCC;     /* R=204, G=204, B=204, Chroma=0 */
+  --status-warning-bg: rgba(204, 204, 204, 0.12);
+  --status-error: #FFFFFF;       /* R=255, G=255, B=255, Chroma=0 */
+  --status-error-bg: rgba(255, 255, 255, 0.12);
+
+  /* Theme Picker Swatches (Strict Achromatic Grayscale: R=G=B, Chroma=0) */
+  --swatch-light-bg: #E5E5E5;    /* R=229, G=229, B=229, Chroma=0 */
+  --swatch-light-dot: #525252;   /* R=82, G=82, B=82, Chroma=0 */
+  --swatch-light-icon: #E5E5E5;  /* R=229, G=229, B=229, Chroma=0 */
+  --swatch-dark-bg: #1A1A1A;     /* R=26, G=26, B=26, Chroma=0 */
+  --swatch-dark-dot: #CCCCCC;    /* R=204, G=204, B=204, Chroma=0 */
+  --swatch-dark-icon: #A3A3A3;   /* R=163, G=163, B=163, Chroma=0 */
+  --swatch-mono-bg: #000000;     /* R=0, G=0, B=0, Chroma=0 */
+  --swatch-mono-dot: #FFFFFF;    /* R=255, G=255, B=255, Chroma=0 */
+  --swatch-mono-icon: #FFFFFF;   /* R=255, G=255, B=255, Chroma=0 */
+
   --glass-bg: rgba(18, 18, 18, 0.85);
   --glass-border: rgba(255, 255, 255, 0.15);
   --glass-blur: blur(20px);
@@ -212,7 +308,7 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Inter", -system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Inter", -system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   font-size: 14px;
   line-height: 1.47059;
   font-weight: 400;
@@ -232,7 +328,7 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", -system-ui, sans-serif;
+  font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", -system-ui, sans-serif;
   font-weight: 600;
   letter-spacing: -0.025em;
   color: var(--text-primary);
