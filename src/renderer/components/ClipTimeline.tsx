@@ -13,8 +13,8 @@ export default function ClipTimeline({ duration, start, end, onStartChange, onEn
   const trackRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState<'start' | 'end' | null>(null);
 
-  const startPercent = (start / duration) * 100;
-  const endPercent = (end / duration) * 100;
+  const startPercent = duration > 0 ? Math.max(0, Math.min(100, (start / duration) * 100)) : 0;
+  const endPercent = duration > 0 ? Math.max(0, Math.min(100, (end / duration) * 100)) : 0;
 
   const handleMouseDown = (type: 'start' | 'end') => (e: React.MouseEvent) => {
     e.preventDefault();

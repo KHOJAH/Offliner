@@ -7,8 +7,9 @@ interface TimeInputProps {
 }
 
 export default function TimeInput({ label, value, onChange, maxDuration }: TimeInputProps) {
-  const minutes = Math.floor(value / 60);
-  const seconds = value % 60;
+  const safeValue = Math.max(0, value || 0);
+  const minutes = Math.floor(safeValue / 60);
+  const seconds = safeValue % 60;
 
   const handleChange = (type: 'minutes' | 'seconds') => (e: React.ChangeEvent<HTMLInputElement>) => {
     const num = parseInt(e.target.value, 10) || 0;
