@@ -11,7 +11,7 @@
 
 <p align="center">
   <a href="https://github.com/KHOJAH/Offliner/releases/latest"><img src="https://img.shields.io/github/v/release/KHOJAH/Offliner?style=flat-square&color=2997FF&label=Release" alt="Latest Release" /></a>
-  <a href="https://github.com/KHOJAH/Offliner"><img src="https://img.shields.io/badge/Tests-474%20Passing%20(Tiers%201--5)-30D158?style=flat-square" alt="Vitest Tests Passing" /></a>
+  <a href="https://github.com/KHOJAH/Offliner"><img src="https://img.shields.io/badge/Tests-541%20Passing%20(Tiers%201--5)-30D158?style=flat-square" alt="Vitest Tests Passing" /></a>
   <a href="https://github.com/KHOJAH/Offliner/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-gray?style=flat-square" alt="MIT License" /></a>
   <a href="https://nodejs.org"><img src="https://img.shields.io/badge/Node.js-%3E%3D%2018.0.0-339933?style=flat-square&logo=node.js&logoColor=white" alt="Node.js" /></a>
   <a href="https://stitch.withgoogle.com"><img src="https://img.shields.io/badge/UI%20Design-Google%20Stitch-purple?style=flat-square" alt="Google Stitch" /></a>
@@ -381,9 +381,9 @@ npm test
 ```
 
 ```
- Test Files  31 passed (31)
-      Tests  474 passed (474)
-   Duration  ~6.7s
+ Test Files  35 passed (35)
+      Tests  541 passed (541)
+   Duration  ~7.7s
 ```
 
 ### Test Tiers Architecture
@@ -392,7 +392,7 @@ npm test
 - **Tier 2: Boundary Conditions (40 tests)**: Zero/negative concurrency clamping, out-of-range timeline sliders, malformed YouTube URLs, empty playlist handling, non-existent files.
 - **Tier 3: Multi-Feature Combinations (16 tests)**: DASH video muxing + audio extraction, timeline multi-clipping + queue state transitions, concurrent batch downloads.
 - **Tier 4: Real-World Resilience (5 tests)**: Process tree SIGKILL terminations, network timeouts, stream stalling, pause/resume `.part` file preservation, YouTube challenge token injection.
-- **Tier 5: Adversarial Hardening (269 tests)**: High-concurrency rule registration, unhandled rejection leak prevention, and mathematical RGB chroma verification (0% color leakage in Monochrome mode).
+- **Tier 5: Adversarial Hardening (336 tests)**: High-concurrency rule registration, unhandled rejection leak prevention, mathematical RGB chroma verification (0% color leakage in Monochrome mode), and automated UI copy inspection guaranteeing zero engineering jargon across all views.
 
 To verify TypeScript contracts and run tests locally:
 ```bash
