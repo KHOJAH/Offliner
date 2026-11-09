@@ -69,28 +69,13 @@ function AppContent() {
   return (
     // The main app container with top navigation and content area. 
     // The content area renders different views based on the current route.
-    <div
-      className="app"
-      style={{
-        padding: "16px",
-        height: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        overflow: "hidden",
-        WebkitAppRegion: "drag" 
-      } as any}
-    >
+    <div className="min-h-screen bg-background text-on-surface flex flex-col font-sans selection:bg-primary/20 selection:text-primary">
       <TopNavBar />
       <main
-        className="app-content"
-        style={{
-          marginTop: "16px",
-          flex: 1,
-          overflow: "hidden",
-          position: "relative",
-          WebkitAppRegion: "no-drag"
-        } as any}
+        className="ml-64 pt-16 min-h-screen flex-1 flex flex-col relative overflow-y-auto"
+        style={{ WebkitAppRegion: "no-drag" } as any}
       >
+        <ToastContainer />
         {renderView("/", <HomeView />)}
         {renderView("/video", <VideoDownloadView />)}
         {renderView("/audio", <AudioExtractView />)}
@@ -99,7 +84,6 @@ function AppContent() {
         {renderView("/queue", <QueueView />)}
         {renderView("/settings", <SettingsView />)}
       </main>
-      <ToastContainer />
     </div>
   );
 }

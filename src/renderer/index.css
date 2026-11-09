@@ -31,6 +31,18 @@
   --glass-border: rgba(0, 0, 0, 0.08);
   --glass-blur: blur(20px);
 
+  /* Stitch Semantic Containers & Surfaces (Light) */
+  --surface-container-lowest: #FFFFFF;
+  --surface-container-low: #F4F4F2;
+  --surface-container: #EEEEEC;
+  --surface-container-high: #E8E8E6;
+  --surface-container-highest: #E2E3E1;
+  --surface-dim: #DADAD8;
+  --surface-bright: #F9F9F7;
+  --outline-variant: rgba(0, 0, 0, 0.08);
+  --secondary-container: #E3E1EC;
+  --secondary-fixed-dim: #C6C5CF;
+
   /* Geometry & Radius */
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -85,6 +97,18 @@
   --glass-border: rgba(0, 0, 0, 0.08);
   --glass-blur: blur(20px);
 
+  /* Stitch Semantic Containers & Surfaces (Light) */
+  --surface-container-lowest: #FFFFFF;
+  --surface-container-low: #F4F4F2;
+  --surface-container: #EEEEEC;
+  --surface-container-high: #E8E8E6;
+  --surface-container-highest: #E2E3E1;
+  --surface-dim: #DADAD8;
+  --surface-bright: #F9F9F7;
+  --outline-variant: rgba(0, 0, 0, 0.08);
+  --secondary-container: #E3E1EC;
+  --secondary-fixed-dim: #C6C5CF;
+
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.08);
@@ -118,6 +142,18 @@
   --glass-border: rgba(255, 255, 255, 0.08);
   --glass-blur: blur(20px);
 
+  /* Stitch Semantic Containers & Surfaces (Dark) */
+  --surface-container-lowest: #0F1013;
+  --surface-container-low: #131417;
+  --surface-container: #1B1C20;
+  --surface-container-high: #222328;
+  --surface-container-highest: #2A2B30;
+  --surface-dim: #101114;
+  --surface-bright: #1E2025;
+  --outline-variant: rgba(255, 255, 255, 0.08);
+  --secondary-container: #2B2C32;
+  --secondary-fixed-dim: #4B4D56;
+
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.5);
   --shadow-lg: 0 12px 36px rgba(0, 0, 0, 0.6);
@@ -150,6 +186,18 @@
   --glass-bg: rgba(18, 18, 18, 0.85);
   --glass-border: rgba(255, 255, 255, 0.15);
   --glass-blur: blur(20px);
+
+  /* Stitch Semantic Containers & Surfaces (Strict Zero Chroma: R=G=B) */
+  --surface-container-lowest: #050505;
+  --surface-container-low: #0A0A0A;
+  --surface-container: #121212;
+  --surface-container-high: #1A1A1A;
+  --surface-container-highest: #242424;
+  --surface-dim: #0D0D0D;
+  --surface-bright: #1E1E1E;
+  --outline-variant: #262626;
+  --secondary-container: #1A1A1A;
+  --secondary-fixed-dim: #333333;
 
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.8);
   --shadow-md: 0 4px 24px rgba(0, 0, 0, 0.9);

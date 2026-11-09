@@ -10,6 +10,7 @@ import { ipcClient } from '@/renderer/ipc/client';
 import { useUIStore } from '@/renderer/stores/uiStore';
 import { useDownloadStore } from '@/renderer/stores/downloadStore';
 import { useSettingsStore } from '@/renderer/stores/settingsStore';
+import { useThemeStore } from '@/renderer/stores/themeStore';
 import type { VideoMetadata, ClipRange } from '@/types';
 
 interface ClipDef {
@@ -32,6 +33,8 @@ export default function ClipsView() {
   const addToast = useUIStore((s) => s.addToast);
   const addDownload = useDownloadStore((s) => s.addDownload);
   const downloadPath = useSettingsStore((s) => s.downloadPath);
+  const theme = useThemeStore((s) => s.theme);
+  const isMonochrome = theme === 'monochrome';
 
   const findBestVideoFormat = (formats: any[]) => {
     const videoFormats = formats.filter((f) => f.vcodec && f.vcodec !== 'none');
@@ -55,28 +58,31 @@ export default function ClipsView() {
     })[0]?.format_id;
   };
 
-  const handleURL = useCallback(async (url: string) => {
-    if (!url.trim()) return;
+  const handleURL = useCallback(
+    async (url: string) => {
+      if (!url.trim()) return;
 
-    if (url.includes('list=') || url.includes('playlist?')) {
-      addToast({ type: 'info', title: 'Playlist Detected', message: 'Redirecting to Playlist tab...' });
-      navigate('/playlist', { state: { url, autoAnalyze: true } });
-      return;
-    }
+      if (url.includes('list=') || url.includes('playlist?')) {
+        addToast({ type: 'info', title: 'Playlist Detected', message: 'Redirecting to Playlist tab...' });
+        navigate('/playlist', { state: { url, autoAnalyze: true } });
+        return;
+      }
 
-    setLoading(true);
-    try {
-      const meta = await ipcClient.getMetadata(url);
-      setMetadata(meta);
-      setEnd(meta.duration);
-      const best = findBestVideoFormat(meta.formats);
-      if (best) setSelectedFormat(best);
-    } catch {
-      addToast({ type: 'error', title: 'Error', message: 'Could not fetch video info.' });
-    } finally {
-      setLoading(false);
-    }
-  }, [addToast, navigate]);
+      setLoading(true);
+      try {
+        const meta = await ipcClient.getMetadata(url);
+        setMetadata(meta);
+        setEnd(meta.duration);
+        const best = findBestVideoFormat(meta.formats);
+        if (best) setSelectedFormat(best);
+      } catch {
+        addToast({ type: 'error', title: 'Error', message: 'Could not fetch video info.' });
+      } finally {
+        setLoading(false);
+      }
+    },
+    [addToast, navigate]
+  );
 
   useEffect(() => {
     if (location.pathname === '/clips' && location.state?.url && location.state?.autoAnalyze) {
@@ -103,39 +109,34 @@ export default function ClipsView() {
       addToast({ type: 'error', title: 'Clip too short', message: 'Minimum clip duration is 1 second.' });
       return;
     }
-    const id = `clip-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-    setClips((prev) => [...prev, {
-      id,
-      name: `Clip ${prev.length + 1}`,
+
+    const newClip: ClipDef = {
+      id: Math.random().toString(36).substring(7),
+      name: `Clip ${clips.length + 1}`,
       start,
       end,
-    }]);
-    addToast({ type: 'success', title: 'Clip added', message: `${Math.floor(end - start)}s` });
+    };
+    setClips([...clips, newClip]);
+    addToast({ type: 'success', title: 'Clip added', message: `${newClip.name} (${(end - start).toFixed(1)}s)` });
   };
 
   const removeClip = (id: string) => {
-    setClips((prev) => prev.filter((c) => c.id !== id));
+    setClips(clips.filter((c) => c.id !== id));
   };
 
-  const nudgeStart = (delta: number) => {
-    setStart((prev) => Math.max(0, Math.min(prev + delta, end - 1)));
-  };
+  const handleDownloadAll = async () => {
+    if (!metadata) return;
+    if (clips.length === 0) {
+      addToast({ type: 'warning', title: 'No clips staged', message: 'Add at least one clip segment before downloading.' });
+      return;
+    }
 
-  const nudgeEnd = (delta: number) => {
-    const maxDur = metadata?.duration || 3600;
-    setEnd((prev) => Math.max(start + 1, Math.min(prev + delta, maxDur)));
-  };
-
-  const downloadAllClips = async () => {
-    if (!metadata || clips.length === 0) return;
-
+    const formatToUse = selectedFormat || findBestVideoFormat(metadata.formats) || undefined;
     const clipRanges: ClipRange[] = clips.map((c) => ({
       name: c.name,
       start: c.start,
       end: c.end,
     }));
-
-    const formatToUse = selectedFormat || findBestVideoFormat(metadata.formats) || undefined;
 
     const id = await ipcClient.addDownload({
       url: metadata.url,
@@ -147,7 +148,7 @@ export default function ClipsView() {
     addDownload({
       id,
       url: metadata.url,
-      title: `${metadata.title} (${clips.length} clips)`,
+      title: `${metadata.title} (${clips.length} Clips)`,
       thumbnail: metadata.thumbnail,
       status: 'downloading',
       progress: 0,
@@ -155,237 +156,273 @@ export default function ClipsView() {
       createdAt: Date.now(),
     });
 
-    addToast({ type: 'success', title: 'Clips download started', message: `${clips.length} clips` });
-    setClips([]);
+    addToast({ type: 'success', title: 'Batch clip download started', message: `${clips.length} segments queued` });
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto py-8 px-4">
-      {/* Top Search & Ingestion */}
-      <div className="max-w-3xl mx-auto mb-8 text-center">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--bg-surface-elevated)] border border-[var(--border-hairline)] shadow-xs mb-3">
-          <span className="w-2 h-2 rounded-full bg-[var(--accent)] animate-pulse" />
-          <span className="text-[11px] font-mono uppercase tracking-wider text-[var(--text-secondary)]">
-            Module 04 // Keyframe-Accurate Trimmer
-          </span>
-        </div>
-        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--text-primary)] mb-2">
-          Precision Clips Trimmer
-        </h2>
-        <p className="text-xs sm:text-sm text-[var(--text-secondary)] mb-6">
-          Non-destructive timeline extraction with frame-accurate soft-seek and multi-clip staging queue.
-        </p>
-
-        <URLInput
-          onURL={handleURL}
-          loading={loading}
-          initialValue={location.pathname === '/clips' ? location.state?.url : undefined}
-        />
-      </div>
-
-      {metadata && (
-        <div className="animate-spring-in flex flex-col gap-6">
-          {/* Stage Metadata Bar */}
-          <div className="glass p-5 rounded-2xl border border-[var(--border-hairline)] shadow-sm flex flex-col sm:flex-row items-center gap-5">
-            <div className="relative w-40 aspect-video rounded-xl overflow-hidden bg-[var(--bg-surface-elevated)] border border-[var(--border-hairline)] shrink-0">
-              <img
-                src={metadata.thumbnail}
-                alt={metadata.title}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute top-1 left-1 px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-black/75 text-white backdrop-blur-xs">
-                STUDIO MASTER
-              </div>
-              <div className="absolute bottom-1 right-1 px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-black/75 text-white backdrop-blur-xs">
-                {formatTime(metadata.duration)}
-              </div>
-            </div>
-
-            <div className="flex-1 text-center sm:text-left min-w-0">
-              <h3 className="text-lg font-bold text-[var(--text-primary)] leading-snug mb-1 truncate">
-                {metadata.title}
-              </h3>
-              <div className="flex items-center gap-3 text-xs text-[var(--text-secondary)] justify-center sm:justify-start">
-                <span>{metadata.uploader}</span>
-                <span>•</span>
-                <span className="font-mono text-[var(--accent)]">24.00 fps Snapping</span>
-                <span>•</span>
-                <span>Stereo 48kHz</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Format & Quality Selector Card */}
-          <div className="glass p-6 rounded-2xl border border-[var(--border-hairline)] shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <h4 className="text-base font-bold text-[var(--text-primary)]">
-                Format & Quality
-              </h4>
-              <span className="text-xs font-mono text-[var(--accent)] font-semibold">
-                High-Bitrate Preservation
+    <div className="flex flex-col w-full">
+      <div className="px-8 py-8 max-w-7xl mx-auto w-full space-y-8">
+        {/* Top Header / Context */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="text-[11px] font-mono text-text-secondary uppercase tracking-wider">
+                Module 05 // Timeline Cutter
               </span>
+              <span className="w-1.5 h-1.5 rounded-full bg-secondary-fixed-dim" />
+              <span className="text-[11px] text-primary font-medium">Keyframe Accurate Trimmer</span>
             </div>
-            <FormatSelector
-              formats={metadata.formats}
-              selected={selectedFormat}
-              onSelect={setSelectedFormat}
-              mode="video"
-            />
+            <h1 className="text-3xl font-bold tracking-tight text-text-primary">
+              Precision Clips & Sub-Segment Builder
+            </h1>
           </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-mono bg-surface-container px-3 py-1.5 rounded-lg border border-outline-variant/20 text-text-secondary">
+              Lossless Non-Destructive Split
+            </span>
+          </div>
+        </div>
 
-          {/* Precision Trimming Console */}
-          <div className="glass p-6 rounded-2xl border border-[var(--border-hairline)] shadow-sm">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="text-base font-bold text-[var(--text-primary)]">
-                New Clip
-              </h4>
-              <div className="flex items-center gap-2 text-xs font-mono text-[var(--text-secondary)]">
-                <span>Range:</span>
-                <span className="text-[var(--accent)] font-bold">{formatTime(start)} → {formatTime(end)}</span>
-                <span className="px-1.5 py-0.2 rounded bg-[var(--bg-surface-elevated)] border border-[var(--border-hairline)] font-semibold">
-                  {formatTime(end - start)}
-                </span>
+        {/* URL Input Strip */}
+        <div className="bg-surface border border-outline-variant/30 rounded-xl p-3 shadow-xs flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center shrink-0 text-primary">
+              <span className="material-symbols-outlined text-[18px]">link</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <URLInput
+                onURL={handleURL}
+                loading={loading}
+                initialValue={metadata?.url || (location.pathname === '/clips' ? location.state?.url : undefined)}
+              />
+            </div>
+          </div>
+        </div>
+
+        {metadata && (
+          <div className="space-y-6 animate-in fade-in duration-300">
+            {/* Media Metadata Banner (Stitch Style) */}
+            <div className="bg-surface border border-outline-variant/30 rounded-xl p-6 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+              <div className="flex items-start sm:items-center gap-5 min-w-0 flex-1">
+                <div className="relative shrink-0 w-36 h-22 rounded-lg overflow-hidden bg-surface-container shadow-xs">
+                  <img src={metadata.thumbnail} alt={metadata.title} className="w-full h-full object-cover" />
+                  <div className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded bg-black/80 text-white font-mono text-[10px]">
+                    {Math.floor(metadata.duration / 60)}:{String(Math.floor(metadata.duration % 60)).padStart(2, '0')}
+                  </div>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-primary/10 text-primary font-medium">
+                      4K Studio Master
+                    </span>
+                    <span className="text-[11px] text-text-secondary font-mono">24.00 fps • Stereo 48kHz</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-text-primary truncate">{metadata.title}</h3>
+                  <p className="text-xs text-text-secondary mt-0.5">{metadata.uploader}</p>
+                </div>
               </div>
             </div>
 
-            {/* Scrubber Timeline */}
-            <ClipTimeline
-              duration={metadata.duration}
-              start={start}
-              end={end}
-              onStartChange={setStart}
-              onEndChange={setEnd}
-            />
-
-            {/* Timecode Inputs with Sub-second Micro-Nudges */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 items-end">
-              {/* Start Time with Nudges */}
-              <div className="flex flex-col gap-2">
-                <TimeInput label="Start" value={start} onChange={setStart} maxDuration={metadata.duration} />
-                <div className="flex items-center gap-1.5 justify-start">
-                  <span className="text-[10px] font-mono text-[var(--text-tertiary)] uppercase mr-1">Nudge:</span>
-                  <button
-                    type="button"
-                    onClick={() => nudgeStart(-1)}
-                    className="px-2 py-0.5 rounded text-[11px] font-mono bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface-hover)] border border-[var(--border-hairline)] text-[var(--text-secondary)]"
-                  >
-                    -1s
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => nudgeStart(1)}
-                    className="px-2 py-0.5 rounded text-[11px] font-mono bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface-hover)] border border-[var(--border-hairline)] text-[var(--text-secondary)]"
-                  >
-                    +1s
-                  </button>
+            {/* Precision Timeline Stage */}
+            <div className="bg-surface border border-outline-variant/30 rounded-xl p-6 shadow-xs space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-primary text-[20px]" aria-hidden="true">timer</span>
+                  <span className="text-xs font-mono text-text-secondary">
+                    Playhead: <strong className="text-text-primary">{(start).toFixed(2)}s</strong> / {(metadata.duration).toFixed(2)}s
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 text-xs font-mono text-text-secondary">
+                  <span>
+                    Snapping:{' '}
+                    <strong className={isMonochrome ? 'text-text-primary' : 'text-emerald-500'}>
+                      ON (I-Frame)
+                    </strong>
+                  </span>
+                  <span className="w-1 h-3 bg-outline-variant/30" />
+                  <span>Duration: <strong className="text-primary">{(end - start).toFixed(1)}s</strong></span>
                 </div>
               </div>
 
-              {/* End Time with Nudges & Add Clip Button */}
-              <div className="flex flex-col gap-2">
-                <TimeInput label="End" value={end} onChange={setEnd} maxDuration={metadata.duration} />
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] font-mono text-[var(--text-tertiary)] uppercase mr-1">Nudge:</span>
+              {/* Scrubber Component */}
+              <ClipTimeline
+                duration={metadata.duration}
+                start={start}
+                end={end}
+                onStartChange={setStart}
+                onEndChange={setEnd}
+              />
+
+              {/* Numerical Inputs with Micro-Nudge Controls */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                <div className="bg-surface-container-low p-4 rounded-xl border border-outline-variant/15 space-y-2">
+                  <div className="flex items-center justify-between text-xs font-semibold text-text-secondary uppercase tracking-wider">
+                    <span>Clip Start (In)</span>
+                    <span className="text-[11px] font-mono text-primary">TC: {start.toFixed(2)}s</span>
+                  </div>
+                  <TimeInput label="Start (Seconds)" value={start} maxDuration={end} onChange={setStart} />
+                  <div className="flex gap-1.5 pt-1">
                     <button
                       type="button"
-                      onClick={() => nudgeEnd(-1)}
-                      className="px-2 py-0.5 rounded text-[11px] font-mono bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface-hover)] border border-[var(--border-hairline)] text-[var(--text-secondary)]"
+                      onClick={() => setStart(Math.max(0, start - 1))}
+                      className="px-2 py-1 rounded bg-surface border border-outline-variant/20 text-[11px] font-mono text-text-secondary hover:text-text-primary"
                     >
                       -1s
                     </button>
                     <button
                       type="button"
-                      onClick={() => nudgeEnd(1)}
-                      className="px-2 py-0.5 rounded text-[11px] font-mono bg-[var(--bg-surface-elevated)] hover:bg-[var(--bg-surface-hover)] border border-[var(--border-hairline)] text-[var(--text-secondary)]"
+                      onClick={() => setStart(Math.min(end - 1, start + 1))}
+                      className="px-2 py-1 rounded bg-surface border border-outline-variant/20 text-[11px] font-mono text-text-secondary hover:text-text-primary"
                     >
                       +1s
                     </button>
+                    <button
+                      type="button"
+                      onClick={() => setStart(Math.max(0, start - 0.04))}
+                      className="px-2 py-1 rounded bg-surface border border-outline-variant/20 text-[11px] font-mono text-text-secondary hover:text-text-primary"
+                    >
+                      -1f
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setStart(Math.min(end - 0.04, start + 0.04))}
+                      className="px-2 py-1 rounded bg-surface border border-outline-variant/20 text-[11px] font-mono text-text-secondary hover:text-text-primary"
+                    >
+                      +1f
+                    </button>
                   </div>
+                </div>
 
-                  <button
-                    type="button"
-                    onClick={addClip}
-                    className="px-5 py-2 rounded-xl text-xs font-bold bg-[var(--accent)] text-[var(--accent-text)] hover:brightness-105 active:scale-95 transition-all shadow-sm cursor-pointer shrink-0"
-                  >
-                    Add Clip
-                  </button>
+                <div className="bg-surface-container-low p-4 rounded-xl border border-outline-variant/15 space-y-2">
+                  <div className="flex items-center justify-between text-xs font-semibold text-text-secondary uppercase tracking-wider">
+                    <span>Clip End (Out)</span>
+                    <span className="text-[11px] font-mono text-primary">TC: {end.toFixed(2)}s</span>
+                  </div>
+                  <TimeInput label="End (Seconds)" value={end} maxDuration={metadata.duration} onChange={setEnd} />
+                  <div className="flex gap-1.5 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => setEnd(Math.max(start + 1, end - 1))}
+                      className="px-2 py-1 rounded bg-surface border border-outline-variant/20 text-[11px] font-mono text-text-secondary hover:text-text-primary"
+                    >
+                      -1s
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEnd(Math.min(metadata.duration, end + 1))}
+                      className="px-2 py-1 rounded bg-surface border border-outline-variant/20 text-[11px] font-mono text-text-secondary hover:text-text-primary"
+                    >
+                      +1s
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEnd(Math.max(start + 0.04, end - 0.04))}
+                      className="px-2 py-1 rounded bg-surface border border-outline-variant/20 text-[11px] font-mono text-text-secondary hover:text-text-primary"
+                    >
+                      -1f
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEnd(Math.min(metadata.duration, end + 0.04))}
+                      className="px-2 py-1 rounded bg-surface border border-outline-variant/20 text-[11px] font-mono text-text-secondary hover:text-text-primary"
+                    >
+                      +1f
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
 
-          {/* Staged Clips Queue */}
-          {clips.length > 0 && (
-            <div className="glass p-6 rounded-2xl border border-[var(--border-hairline)] shadow-sm flex flex-col gap-4">
+              {/* Action Buttons: Add Clip */}
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={addClip}
+                  className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-on-primary font-semibold text-xs flex items-center gap-1.5 shadow-sm active:scale-95 transition-all"
+                >
+                  <span className="material-symbols-outlined text-[16px]" aria-hidden="true">add_circle</span>
+                  <span>Add Clip</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Quality & Format Card */}
+            <div className="bg-surface border border-outline-variant/30 rounded-xl p-5 shadow-xs space-y-3">
               <div className="flex items-center justify-between">
-                <h4 className="text-base font-bold text-[var(--text-primary)]">
-                  Clips Queue ({clips.length})
-                </h4>
-                <span className="text-xs font-mono text-[var(--text-secondary)]">
-                  Batch multi-segment export
+                <h3 className="font-semibold text-sm text-text-primary">Format & Quality</h3>
+                <span className="text-[11px] font-mono text-text-secondary">Applies to all staged clips</span>
+              </div>
+              <FormatSelector
+                formats={metadata.formats}
+                selected={selectedFormat}
+                onSelect={setSelectedFormat}
+              />
+            </div>
+
+            {/* Extraction Queue / Staged Clips */}
+            <div className="bg-surface border border-outline-variant/30 rounded-xl p-6 shadow-xs space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="font-semibold text-sm text-text-primary">Extraction Queue</h4>
+                  <p className="text-xs text-text-secondary">
+                    Clips staged for rendering. Keyframe-accurate split without re-encoding quality loss.
+                  </p>
+                </div>
+                <span className="text-xs font-mono bg-surface-container px-3 py-1 rounded-full text-text-primary font-medium">
+                  {clips.length} Segments
                 </span>
               </div>
 
-              <div className="space-y-2.5">
-                {clips.map((clip, idx) => (
-                  <div
-                    key={clip.id}
-                    className="p-3.5 rounded-xl bg-[var(--bg-surface-elevated)] border border-[var(--border-hairline)] flex items-center justify-between gap-4"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <span className="font-mono text-xs font-bold text-[var(--accent)]">
-                        #{String(idx + 1).padStart(2, '0')}
-                      </span>
-                      <div className="min-w-0">
-                        <div className="text-sm font-semibold text-[var(--text-primary)] truncate">
-                          {clip.name}
-                        </div>
-                        <div className="text-xs font-mono text-[var(--text-secondary)]">
-                          {formatTime(clip.start)} → {formatTime(clip.end)}
-                          <span className="ml-2 font-semibold text-[var(--accent)]">
-                            ({(clip.end - clip.start).toFixed(1)}s)
-                          </span>
+              {clips.length === 0 ? (
+                <div className="py-8 text-center text-xs text-text-secondary border border-dashed border-outline-variant/30 rounded-xl">
+                  No clip segments staged yet. Set your in/out points and click the add button above to stage segments.
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {clips.map((clip, idx) => (
+                    <div
+                      key={clip.id}
+                      className="flex items-center justify-between p-3.5 rounded-xl bg-surface-container-low border border-outline-variant/15 text-xs"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="w-6 h-6 rounded-md bg-surface font-mono font-bold flex items-center justify-center text-primary text-[11px] border border-outline-variant/20">
+                          #{String(idx + 1).padStart(2, '0')}
+                        </span>
+                        <div>
+                          <div className="font-semibold text-text-primary">{clip.name}</div>
+                          <div className="text-[11px] font-mono text-text-secondary">
+                            {clip.start.toFixed(2)}s → {clip.end.toFixed(2)}s • Duration: {(clip.end - clip.start).toFixed(1)}s
+                          </div>
                         </div>
                       </div>
+                      <button
+                        type="button"
+                        onClick={() => removeClip(clip.id)}
+                        className="p-1.5 rounded-lg text-text-secondary hover:text-rose-500 hover:bg-surface transition-colors"
+                        title="Remove Segment"
+                      >
+                        <span className="material-symbols-outlined text-[16px]" aria-hidden="true">close</span>
+                      </button>
                     </div>
+                  ))}
+                </div>
+              )}
 
-                    <button
-                      type="button"
-                      onClick={() => removeClip(clip.id)}
-                      className="px-3 py-1 text-xs font-semibold rounded-lg bg-[var(--error)]/10 hover:bg-[var(--error)]/20 text-[var(--error)] border border-[var(--error)]/20 transition-all cursor-pointer active:scale-95"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-4 pt-4 border-t border-[var(--border-hairline)]">
+              {/* Master CTA Download All */}
+              <div className="pt-4 border-t border-outline-variant/15 flex justify-end">
                 <button
                   type="button"
-                  onClick={downloadAllClips}
-                  className="w-full py-3.5 rounded-xl font-bold text-sm tracking-wide bg-[var(--accent)] text-[var(--accent-text)] hover:brightness-105 active:scale-[0.99] transition-all shadow-md cursor-pointer flex items-center justify-center gap-2"
+                  onClick={handleDownloadAll}
+                  disabled={clips.length === 0}
+                  className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-primary hover:bg-primary-hover text-on-primary font-semibold text-sm flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all disabled:opacity-50 disabled:pointer-events-none"
                 >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879a3 3 0 11-4.242-4.242l2.879-2.879m0 0a3 3 0 114.242-4.242L12 7.758" />
-                  </svg>
+                  <span className="material-symbols-outlined text-[18px]" aria-hidden="true">download</span>
                   <span>Download All Clips</span>
                 </button>
               </div>
             </div>
-          )}
-        </div>
-      )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
-
-function formatTime(seconds: number): string {
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = Math.floor(seconds % 60);
-  if (h > 0) return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-  return `${m}:${s.toString().padStart(2, '0')}`;
-}
-
